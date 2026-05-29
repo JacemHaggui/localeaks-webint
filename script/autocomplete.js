@@ -15,7 +15,7 @@ const lonMax = 7.865, latMax = 44.234;
 
 // Fetch suggestions from OpenStreetMap API
 async function fetchSuggestions(query) {
-  const url = https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&viewbox=${lonMin},${latMax},${lonMax},${latMin}&bounded=1;
+  const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&viewbox=${lonMin},${latMax},${lonMax},${latMin}&bounded=1`;
   const res = await fetch(url, { headers: { "Accept-Language": "fr" } });
   return res.json();
 }
@@ -45,7 +45,7 @@ function showSuggestions(list) {
       input.value = label;
       suggestionsBox.innerHTML = "";
       window.location.href =
-        address.html?lat=${place.lat}&lon=${place.lon}&label=${encodeURIComponent(label)};
+        `address.html?lat=${place.lat}&lon=${place.lon}&label=${encodeURIComponent(label)}`;
     };
 
     suggestionsBox.appendChild(div);
@@ -80,7 +80,7 @@ searchBtn?.addEventListener("click", () => {
   const q = input.value.trim();
   if (q.length < 3) return alert("Adresse invalide");
 
-  window.location.href = results.html?q=${encodeQuery(q)};
+  window.location.href = `results.html?q=${encodeQuery(q)}`;
 });
 
 // Enter key support
