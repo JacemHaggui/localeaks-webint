@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Détails du logement - LocaLeaks</title>
+  <link rel="icon" href="LocaLeaksFavicon.png" type="image/png">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+ 
+</head>
+<body>
+  <header id="site-header">
+  <h1>
+    <a href="index.html" style="color: inherit; text-decoration: none;">LocaLeaks</a>
+  </h1>
+  </header>
+
+  <main>
+    <section id="address-info">
+      <h2 id="address-title">Chargement...</h2>
+      <div id="map"></div>
+    </section>
+
+    <section id="apartments">
+      <h3>Appartements à cette adresse</h3>
+      <div id="apartments-list"></div>
+      <button id="addApartmentBtn">Ajouter un appartement</button>
+    </section>
+  </main>
+
+  <script>
+    function getQueryParam(name) {
+      const params = new URLSearchParams(window.location.search);
+      return params.get(name);
+    }
+
+    const lat = getQueryParam("lat");
+    const lon = getQueryParam("lon");
+    const label = decodeURIComponent(getQueryParam("label") || "");
+
+    document.getElementById("address-title").textContent = label || "Adresse inconnue";
+
+    // Getting a map view of the region
+    if (lat && lon) {
+      const map = L.map("map").setView([lat, lon], 16);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+      L.marker([lat, lon]).addTo(map).bindPopup(label).openPopup();
+    }
+
+    const apartmentsList = document.getElementById("apartments-list");
+    const addApartmentBtn = document.getElementById("addApartmentBtn");
+
+    function renderApartments(apartments) {
+      apartmentsList.innerHTML = "";
+      if (!apartments || apartments.length === 0) {
+        apartmentsList.innerHTML = "<p>Aucun appartement trouvé à cette adresse.</p>";
+        return;
+      }
+
+      apartments.forEach(a => {
+        const card = document.createElement("div");
+        card.className = "apartment-card";
+
+        // Charges
+        let chargesDisplay = "N/A";
+        if (a.charges) {
+          chargesDisplay = `${a.charges.charges_amount}€`;
+          const included = [];
+          if (a.charges.water) included.push("Eau");
+          if (a.charges.electricity) included.push("Électricité");
+          if (a.charges.heating) included.push("Chauffage");
+          if (a.charges.internet) included.push("Internet");
+          if (a.charges.copropriete) included.push("Copropriété");
+          if (included.length > 0) chargesDisplay += ` (${included.join(", ")})`;
+        }
+
+        // Landlord
+        let landlordName = "Inconnu";
+        if (a.landlord) {
+          landlordName = a.landlord.name;
+        }
+
+        // Average rating
+        let avgRating = "N/A";
+        if (a.average_reviews && a.average_reviews.overall != null) {
+          avgRating = a.average_reviews.overall.toFixed(1) + "/10";
+        }
+
+        card.innerHTML = `
+          <h4>Appartement ${a.number || "N/A"}</h4>
+          <p><strong>Propriétaire :</strong> ${landlordName}</p>
+          <p><strong>Chambres :</strong> ${a.bedrooms || 0}</p>
+          <p><strong>Salles de bain :</strong> ${a.bathrooms || 0}</p>
+          <p><strong>Surface :</strong> ${a.size_sqm || "N/A"} m²</p>
+          <p><strong>Loyer :</strong> ${a.rent != null ? a.rent.toFixed(2) + "€" : "N/A"}</p>
+          <p><strong>Charges :</strong> ${chargesDisplay}</p>
+          <p><strong>Note moyenne :</strong> ${avgRating}</p>
+        `;
+
+        card.addEventListener("click", () => {
+          window.location.href = `apartment.html?id=${a.id}`;
+        });
+
+        apartmentsList.appendChild(card);
+      });
+    }
+
+    async function loadApartments() {
+      const token = localStorage.getItem("token");
+
+      try {
+        const response = await fetch(`http://127.0.0.1:8000/apartments?address=${encodeURIComponent(label)}`, {
+          headers: {
+            "Authorization": token ? `Bearer ${token}` : ""
+          }
+        });
+
+        if (response.status === 401) {
+          apartmentsList.innerHTML = `
+            <p style="color: red;">Veuillez vous connecter ou créer un compte pour accéder à cette fonctionnalité.</p>
+          `;
+          return;
+        }
+
+        if (!response.ok) throw new Error("Erreur lors de la récupération des appartements");
+        const data = await response.json();
+        renderApartments(data.apartments);
+
+      } catch (err) {
+        console.error(err);
+        apartmentsList.innerHTML = "<p>Impossible de récupérer les appartements depuis le serveur.</p>";
+      }
+    }
+
+    loadApartments();
+
+    addApartmentBtn.addEventListener("click", () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        const warning = document.createElement("p");
+        warning.textContent = "Veuillez vous connecter pour ajouter un appartement.";
+        warning.className = "warning-message";
+        addApartmentBtn.insertAdjacentElement("afterend", warning);
+
+        // Fade out after 3 seconds
+        setTimeout(() => {
+          warning.style.opacity = "0";
+          setTimeout(() => warning.remove(), 500);
+        }, 3000);
+        return;
+      }
+
+      window.location.href = "add_apartment.html";
+    });
+  </script>
+
+  <script src="header.js"></script>
+</body>
+</html>
