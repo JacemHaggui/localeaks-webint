@@ -288,3 +288,67 @@ input[type="checkbox"] {
   height: auto;
 
 }
+
+/* =========================
+Address page formatting
+========================= */
+
+#map { height: 300px; margin-bottom: 20px; border-radius: 8px; }
+
+#apartments-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 10px;
+}
+
+.apartment-card {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 12px 16px;
+  width: 280px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.apartment-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+.apartment-card h4 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  color: #333;
+}
+
+.apartment-card p {
+  margin: 4px 0;
+  font-size: 14px;
+  color: #555;
+}
+
+#addApartmentBtn {
+  margin-top: 16px;
+  padding: 10px 16px;
+  font-size: 16px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#addApartmentBtn:hover {
+  background-color: #0056b3;
+}
+
+.warning-message {
+  color: red;
+  margin-top: 10px;
+  opacity: 1;
+  transition: opacity 0.5s ease;
+}
