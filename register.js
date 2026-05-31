@@ -6,10 +6,16 @@ document.getElementById('registerForm').addEventListener('submit', function(even
     const password = document.getElementById('regPassword').value;
     const messageDiv = document.getElementById('registerMessage');
 
+    const sex = document.getElementById('sex').value;
+    const age = document.getElementById('age').value;
+    const INE = document.getElementById('INE').value;
+
+
+
     fetch('http://localhost:3000/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: username, email: email, password: password })
+        body: JSON.stringify({ username: username, email: email, password: password, sex: sex, age: age, INE: INE })
     })
     .then(response => {
         if (!response.ok) throw new Error("Erreur lors de l'inscription");

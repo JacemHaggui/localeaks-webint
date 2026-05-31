@@ -19,9 +19,9 @@ const usersDatabase = [];
 
 app.post('/register', async (req, res) => {
     try {
-        const { username, email, password } = req.body;
+        const { username, email, password, sex, age, INE } = req.body;
 
-        if (!username || !email || !password) {
+        if (!username || !email || !password || !sex || !age || !INE) {
             return res.status(400).json({ error: 'Tous les champs sont requis.' });
         }
 
@@ -38,7 +38,10 @@ app.post('/register', async (req, res) => {
         usersDatabase.push({
             username: username,
             email: email.toLowerCase(),
-            passwordHash: hashedPassword
+            passwordHash: hashedPassword,
+            sex: sex,
+            age: age,
+            INE: INE
         });
 
         return res.status(201).json({ message: 'Compte créé avec succès !' });
@@ -91,6 +94,46 @@ app.post('/login', async (req, res) => {
     }
 });
 
+
+app.get('/profile', (req, res) => {
+    // 1. On récupère le token envoyé par le site
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1]; 
+
+    if (!token) {
+        return res.status(401).json({ error: "Accès refusé, token manquant" });
+    }
+
+    try {
+        // 2. CORRECTION : On utilise JWT_SECRET (et non SECRET_KEY)
+        const decoded = jwt.verify(token, JWT_SECRET);
+        
+        // 3. CORRECTION : On récupère le username (puisqu'il a été enregistré au login)
+        const currentUsername = decoded.username; 
+
+        // 4. CORRECTION : On cherche dans la base de données via le username
+        const currentUser = usersDatabase.find(user => user.username === currentUsername);
+
+        if (!currentUser) {
+            return res.status(404).json({ error: "Utilisateur non trouvé" });
+        }
+
+        // 5. On renvoie les infos (Attention au nom de la variable : c'est 'sex' et non 'selectedSex')
+        res.json({
+            username: currentUser.username,
+            email: currentUser.email,
+            sex: currentUser.sex,
+            age: currentUser.age
+        });
+
+    } catch (error) {
+        console.error("Erreur de token :", error.message);
+        return res.status(403).json({ error: "Token invalide ou expiré" });
+    }
+});
+
+
 app.listen(PORT, () => {
     console.log(` Serveur LocaLeaks actif sur : http://localhost:${PORT}`);
 });
+
