@@ -57,7 +57,7 @@ function showSuggestions(suggestions) {
   );
   localMatches.forEach(a => {
     const div = document.createElement("div");
-    div.textContent = a.label;
+    div.textContent = "📍 " + a.label;
     div.addEventListener("click", () => {
       input.value = a.label;
       suggestionsBox.innerHTML = "";
