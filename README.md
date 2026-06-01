@@ -1,26 +1,76 @@
-# localeaks-webint
 
+# LocaLeaks-webint
 
-Required librairies and packages :  
+  
 
-install Node js latest version on https://nodejs.org/en/download  
+## Description
 
-If you don't have the permissions to execute local scripts in windows, run in a administrator powershell terminal :  
-Set-ExecutionPolicy Restricted -Scope CurrentUser  
+  
 
-Then execute :  
-npm init -y  
-npm install express cors  
-npm install bcrypt (for the hashing function to handle passwords. By precaution, enter a dummy password)  
-npm install express cors jsonwebtoken (express : creates the server, cors : security module enabling the browser to send fetch request to our local server, jsonwebtoken : generates the token to tell our server that the connexion is safe)  
+LocaLeaks is a web application for students looking for information about apartments and landlords.
 
-launch the server with :  
-python -m http.server  
+## Online website
 
-in backend/, launch the node server with :  
-node server.js  
+You can find the website at https://localeaks.org/
 
-As long as server.js is running, you can create accounts, connect, disconnect...  
-emails, usernames and passwords are stored by the server.js in a temporary list to simulate a real database  
-When server.js is closed, everything is erased  
+  
+
+## Project Structure
+
+```text
+localeaks-webint/
+|-- DataBase/                         SQL files used to create and maintain the database.
+|   |-- AutoUpdates.sql               SQL automation/update script.
+|   |-- CreateLocaLeaksDatabase.sql   Main database creation script.
+|   `-- auto_update_deletion.sql      SQL script for automatic deletion/update behavior.
+|-- frontend/                         Static website files shown to users in the browser.
+|   |-- LocaLeaksFavicon.png          Browser tab icon.
+|   |-- LocaLeaksLogo.jpg             LocaLeaks logo image.
+|   |-- add_apartment.html            Page for adding a new apartment.
+|   |-- address.html                  Address search page.
+|   |-- apartment.html                Apartment detail page.
+|   |-- config.js                     Stores the backend API URL used by the frontend.
+|   |-- header.js                     Shared navigation/header behavior.
+|   |-- index.html                    Homepage.
+|   |-- landlord.html                 Landlord detail page.
+|   |-- leave_review.html             Page for leaving an apartment review.
+|   |-- leave_review_landlord.html    Page for leaving a landlord review.
+|   |-- login.html                    Login page.
+|   |-- profile.html                  User profile/account page.
+|   |-- register.html                 Account creation page.
+|   |-- results.html                  Search results page.
+|   |-- script.js                     Main frontend JavaScript logic.
+|   |-- style.css                     Main website styling.
+|   `-- verify.html                   Email verification page.
+|-- localeaks-backend/                FastAPI backend and database access code.
+|   |-- app.py                        Main API server with routes and authentication.
+|   |-- db.py                         Database connection setup.
+|   |-- email_utils.py                Email sending helper for verification codes.
+|   |-- queries.py                    SQL query helper functions used by the API.
+|   `-- requirements.txt              Python dependencies for the backend.
+|-- README.md                         Main project documentation.
+```
+  
+
+## Usage
+
+  
+
+Users can:
+
+  
+
+- Create an account (use a real email and a password you will remember as you will need to verify your email and use the password to log in after creating an account)
+
+- Log in
+
+- Search for apartments by address
+
+- View apartment and landlord information
+
+- Add reviews
+
+- Delete their account
+
+ 
 
