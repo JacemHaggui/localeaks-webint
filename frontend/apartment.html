@@ -7,6 +7,17 @@
   <link rel="icon" href="LocaLeaksFavicon.png" type="image/png">
   <link rel="stylesheet" href="style.css">
   <style>
+    .apartment-videos {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+    .apt-video {
+      width: 480px;
+      max-width: 100%;
+      border-radius: 8px;
+    }
     .apartment-photos {
       display: flex;
       gap: 12px;
@@ -212,6 +223,22 @@
       } else {
         photosContainer.textContent = "Aucune photo disponible.";
       }
+
+      // Videos
+      const videosContainer = document.createElement("div");
+      videosContainer.className = "apartment-videos";
+      if (data.videos && data.videos.length > 0) {
+        data.videos.forEach(url => {
+          const video = document.createElement("video");
+          video.controls = true;
+          video.className = "apt-video";
+          video.innerHTML = `<source src="${url}" type="video/mp4">`;
+          videosContainer.appendChild(video);
+        });
+      } else {
+        videosContainer.textContent = "Aucune vidéo disponible.";
+      }
+      photosContainer.insertAdjacentElement("afterend", videosContainer);
 
       const avg = data.average_reviews || {};
       document.getElementById("avg-cleanliness").textContent = (avg.cleanliness || 0).toFixed(1);
