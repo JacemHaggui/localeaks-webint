@@ -23,8 +23,6 @@ localeaks-webint/
 |   |-- AutoUpdates.sql               SQL automation/update script.
 |   |-- CreateLocaLeaksDatabase.sql   Main database creation script.
 |   `-- auto_update_deletion.sql      SQL script for automatic deletion/update behavior.
-|-- data/                             Static data files for local testing.
-|   `-- apartments.json               Local apartment data used for development and testing.
 |-- frontend/                         Static website files shown to users in the browser.
 |   |-- LocaLeaksFavicon.png          Browser tab icon.
 |   |-- LocaLeaksLogo.jpg             LocaLeaks logo image.
