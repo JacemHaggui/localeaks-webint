@@ -3,6 +3,22 @@
 // Address search + suggestions (index page only)
 // ========================
 
+// Adresses locales de test (toujours proposées en premier)
+const localAddresses = [
+  {
+    label: "15 avenue Docteur Dautheville, 06160 Antibes",
+    lat: "43.56919",
+    lon: "7.11292",
+    folder: "apt_15_avenue_Dr_Dautheville"
+  },
+  {
+    label: "24 boulevard Gustave Chancel, 06160 Antibes",
+    lat: "43.579281", 
+    lon: "7.118433",
+    folder: "apt_24_boulevard_Gustave_Chancel"
+  }
+];
+
 const input = document.getElementById("searchInput");
 const suggestionsBox = document.getElementById("suggestions");
 const searchBtn = document.getElementById("searchBtn");
@@ -42,19 +58,35 @@ function formatPlace(place) {
 function showSuggestions(list) {
   suggestionsBox.innerHTML = "";
 
+  // Suggestions locales en premier
+  const q = input.value.trim().toLowerCase();
+  const localMatches = localAddresses.filter(a =>
+    a.label.toLowerCase().includes(q)
+  );
+
+  localMatches.forEach(a => {
+    const div = document.createElement("div");
+    div.textContent = "📍 " + a.label;
+    div.onclick = () => {
+      input.value = a.label;
+      suggestionsBox.innerHTML = "";
+      window.location.href =
+        `address.html?lat=${a.lat}&lon=${a.lon}&label=${encodeURIComponent(a.label)}`;
+    };
+    suggestionsBox.appendChild(div);
+  });
+
+  // Puis les résultats OpenStreetMap
   list.forEach(place => {
     const div = document.createElement("div");
     const label = formatPlace(place);
-
     div.textContent = label;
-
     div.onclick = () => {
       input.value = label;
       suggestionsBox.innerHTML = "";
       window.location.href =
         `address.html?lat=${place.lat}&lon=${place.lon}&label=${encodeURIComponent(label)}`;
     };
-
     suggestionsBox.appendChild(div);
   });
 }
@@ -68,6 +100,9 @@ input?.addEventListener("input", () => {
     suggestionsBox.innerHTML = "";
     return;
   }
+
+  // Affiche les suggestions locales immédiatement
+  showSuggestions([]);
 
   debounceTimeout = setTimeout(async () => {
     const results = await fetchSuggestions(q);
@@ -85,9 +120,17 @@ document.addEventListener("click", (e) => {
 // Search button redirect
 searchBtn?.addEventListener("click", () => {
   const q = input.value.trim();
-  if (q.length < 3) return alert("Adresse invalide");
+  if (q.length < 3) return alert("Veuillez entrer une adresse");
 
-  window.location.href = `results.html?q=${encodeQuery(q)}`;
+  const match = localAddresses.find(a =>
+    a.label.toLowerCase().includes(q.toLowerCase())
+  );
+
+  if (match) {
+    window.location.href = `address.html?lat=${match.lat}&lon=${match.lon}&label=${encodeURIComponent(match.label)}`;
+  } else {
+    alert("Adresse non trouvée. Sélectionnez une adresse dans les suggestions.");
+  }
 });
 
 // Enter key support

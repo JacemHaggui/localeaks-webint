@@ -1,0 +1,30 @@
+{
+  "apartments": [
+    {
+      "id": 1,
+      "number": "1",
+      "address": "15 avenue Docteur Dautheville, 06160 Antibes",
+      "bedrooms": 2,
+      "bathrooms": 1,
+      "size_sqm": 45,
+      "rent": 650,
+      "charges": { "charges_amount": 80, "water": true, "electricity": false, "heating": true, "internet": false },
+      "landlord": { "name": "M. Dupont" },
+      "average_reviews": { "overall": 7.5 },
+      "media_folder": "apt_15_avenue_Dr_Dautheville"
+    },
+    {
+      "id": 2,
+      "number": "1",
+      "address": "24 boulevard Gustave Chancel, 06160 Antibes",
+      "bedrooms": 3,
+      "bathrooms": 1,
+      "size_sqm": 60,
+      "rent": 850,
+      "charges": { "charges_amount": 100, "water": true, "electricity": true, "heating": false, "internet": true },
+      "landlord": { "name": "Mme Martin" },
+      "average_reviews": { "overall": 6.2 },
+      "media_folder": "apt_24_boulevard_Gustave_Chancel"
+    }
+  ]
+}

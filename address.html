@@ -112,30 +112,26 @@
     async function loadApartments() {
       const token = localStorage.getItem("token");
 
+      if (!token) {
+        apartmentsList.innerHTML = `<p style="color: red;">Veuillez vous connecter pour accéder à cette fonctionnalité.</p>`;
+        return;
+      }
+
       try {
-        const response = await fetch(`http://127.0.0.1:8000/apartments?address=${encodeURIComponent(label)}`, {
-          headers: {
-            "Authorization": token ? `Bearer ${token}` : ""
-          }
-        });
-
-        if (response.status === 401) {
-          apartmentsList.innerHTML = `
-            <p style="color: red;">Veuillez vous connecter ou créer un compte pour accéder à cette fonctionnalité.</p>
-          `;
-          return;
-        }
-
-        if (!response.ok) throw new Error("Erreur lors de la récupération des appartements");
+        const response = await fetch('data/apartments.json');
         const data = await response.json();
-        renderApartments(data.apartments);
+
+        const results = data.apartments.filter(a =>
+          a.address.toLowerCase().includes(label.toLowerCase())
+        );
+        renderApartments(results);
 
       } catch (err) {
         console.error(err);
-        apartmentsList.innerHTML = "<p>Impossible de récupérer les appartements depuis le serveur.</p>";
+        apartmentsList.innerHTML = "<p>Impossible de récupérer les appartements.</p>";
       }
     }
-
+    
     loadApartments();
 
     addApartmentBtn.addEventListener("click", () => {
