@@ -1,1 +1,7 @@
+localeaks-backend/.env
 .DS_Store
+*.pyc
+localeaks-backend/testmailgun.py
+.gitignore
+
+localeaks-backend/testsend.py
