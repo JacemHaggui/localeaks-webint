@@ -287,6 +287,32 @@ label {
     position: relative; /* parent for absolute positioning */
 }
 
+.photo-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.apt-photo {
+  width: 300px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.video-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.apt-video {
+  width: 480px;
+  max-width: 100%;
+  border-radius: 8px;
+}
+
 .nav-buttons {
     position: absolute;
     top: 20px;    /* distance from top of header */
