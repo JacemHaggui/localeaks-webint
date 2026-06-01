@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connexion - LocaLeaks</title>
+  <link rel="icon" href="LocaLeaksFavicon.png" type="image/png">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+
+  <header id="site-header">
+    <h1>
+      <a href="index.html" style="color: inherit; text-decoration: none;">LocaLeaks</a>
+    </h1>
+  </header>
+
+  <div class="login-container">
+    <h2>Connexion</h2>
+    <form id="loginForm">
+        <div class="form-group">
+            <label for="email">Adresse e-mail</label>
+            <input type="email" id="email" name="email" required placeholder="exemple@mail.com">
+        </div>
+        
+        <div class="form-group">
+          <label for="password">Mot de passe</label>
+          <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="Votre mot de passe">
+        </div>
+
+        <button type="submit">Se connecter</button>
+    </form>
+    
+    <div id="message"></div>
+  </div>
+
+  <script src="login.js"></script>
+</body>
+</html>

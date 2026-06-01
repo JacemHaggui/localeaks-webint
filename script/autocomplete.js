@@ -15,20 +15,27 @@ const lonMax = 7.865, latMax = 44.234;
 
 // Fetch suggestions from OpenStreetMap API
 async function fetchSuggestions(query) {
-  const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&viewbox=${lonMin},${latMax},${lonMax},${latMin}&bounded=1`;
-  const res = await fetch(url, { headers: { "Accept-Language": "fr" } });
+  const url =
+    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&addressdetails=1&limit=5&viewbox=${lonMin},${latMax},${lonMax},${latMin}&bounded=1`;
+
+  const res = await fetch(url, {
+    headers: { "Accept-Language": "fr" }
+  });
+
   return res.json();
 }
 
-// Format address for display
+// Format a readable label: house number + road + postal code + city
 function formatPlace(place) {
   const addr = place.address || {};
-  return (
-    (addr.house_number ? addr.house_number + " " : "") +
-    (addr.road || "") +
-    (addr.postcode ? ", " + addr.postcode : "") +
-    (addr.city ? " " + addr.city : "")
-  ) || place.display_name;
+  let label = "";
+
+  if (addr.house_number) label += addr.house_number + " ";
+  if (addr.road) label += addr.road;
+  if (addr.postcode) label += ", " + addr.postcode;
+  if (addr.city) label += " " + addr.city;
+
+  return label || place.display_name;
 }
 
 // Show dropdown suggestions

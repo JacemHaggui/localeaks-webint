@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Détails du logement - LocaLeaks</title>
+  <link rel="icon" href="LocaLeaksFavicon.png" type="image/png">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+ 
+</head>
+<body>
+  <header id="site-header">
+  <h1>
+    <a href="index.html" style="color: inherit; text-decoration: none;">LocaLeaks</a>
+  </h1>
+  </header>
+
+
+<div class="register-container">
+    <form id="registerForm">
+        <aside>
+            <h1>Informations</h1>
+            <ul id="Information_section">
+                <li><p>Age: <input type="text" id="age" name="name"></p></li>
+                <li><p>Sex: <input type="text" id="sex" name="name"></p></li>
+                <li><p>Numéro Etudiant INE: <input type="text" id="INE" name="INE"></p></li>
+            </ul>
+        </aside>
+        <h1>Inscription</h1>
+        <div class="form-group">
+            <label for="regUsername">Nom d'utilisateur</label>
+            <input type="text" id="regUsername" name="username" required minlength="3" placeholder="Ex: DevAnonyme">
+        </div>
+
+        <div class="form-group">
+            <label for="regEmail">Adresse e-mail</label>
+            <input type="email" id="regEmail" name="email" required placeholder="exemple@mail.com">
+        </div>
+
+        <div class="form-group">
+            <label for="regPassword">Mot de passe</label>
+            <input type="password" id="regPassword" name="password" required minlength="8" placeholder="8 caractères minimum">
+        </div>
+
+        <button type="submit">Créer mon compte</button>
+    </form>
+
+
+    
+    <div id="registerMessage" class="hidden"></div>
+</div>
+<script src="register.js"></script>
+</body>
