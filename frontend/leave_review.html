@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laisser un avis - LocaLeaks</title>
+  <link rel="icon" href="LocaLeaksFavicon.png" type="image/png">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    main { max-width: 700px; margin: auto; padding: 20px; }
+    h2 { text-align: center; margin-bottom: 20px; }
+    form { background: #f5f5f5; padding: 20px; border-radius: 8px; border: 1px solid #ddd; }
+    label { font-weight: bold; }
+    textarea { width: 100%; min-height: 80px; margin-top: 6px; padding: 6px; border-radius: 4px; border: 1px solid #ccc; }
+    .rating-group { display: flex; align-items: center; margin-bottom: 12px; }
+    .rating-label { width: 150px; }
+    .rating-slider { flex: 1; display: flex; align-items: center; gap: 10px; }
+    .rating-slider input[type="range"] { flex: 1; }
+    .rating-value { width: 30px; text-align: right; }
+    button { padding: 10px 16px; background: #1976d2; color: #fff; border: none; border-radius: 4px; cursor: pointer; display: block; margin: 20px auto 0 auto; }
+    button:hover { background: #155a9c; }
+    #formMessage { margin-top: 12px; text-align: center; font-weight: bold; }
+    #loginMessage { color: red; text-align: center; margin-bottom: 20px; }
+    #apartmentInfo { background: #f0f8ff; padding: 12px 16px; border-radius: 8px; border: 1px solid #cce; margin-bottom: 20px; }
+    #apartmentInfo div { margin-bottom: 6px; }
+  </style>
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <main>
+    <h2>Laisser un avis sur l'appartement</h2>
+    <div id="loginMessage"></div>
+
+    <div id="apartmentInfo"></div>
+
+    <form id="leaveReviewForm" style="display:none;">
+      <div class="rating-group">
+        <span class="rating-label">Propreté :</span>
+        <div class="rating-slider">
+          <input type="range" id="cleanliness" min="0" max="10" step="1" value="5">
+          <span id="val-cleanliness" class="rating-value">5</span>/10
+        </div>
+      </div>
+
+      <div class="rating-group">
+        <span class="rating-label">État général :</span>
+        <div class="rating-slider">
+          <input type="range" id="value_for_money" min="0" max="10" step="1" value="5">
+          <span id="val-value_for_money" class="rating-value">5</span>/10
+        </div>
+      </div>
+
+      <div class="rating-group">
+        <span class="rating-label">Confort :</span>
+        <div class="rating-slider">
+          <input type="range" id="amenities" min="0" max="10" step="1" value="5">
+          <span id="val-amenities" class="rating-value">5</span>/10
+        </div>
+      </div>
+
+      <div class="rating-group">
+        <span class="rating-label">Note globale :</span>
+        <div class="rating-slider">
+          <input type="range" id="overall" min="0" max="10" step="1" value="5">
+          <span id="val-overall" class="rating-value">5</span>/10
+        </div>
+      </div>
+
+      <label for="comment">
+        Commentaire :
+        <textarea id="comment" placeholder="Décrivez votre expérience..."></textarea>
+      </label>
+
+      <button type="submit">Envoyer l'avis</button>
+      <div id="formMessage"></div>
+    </form>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 LocaLeaks | Par les étudiants, pour les étudiants</p>
+  </footer>
+
+  <script>
+    const token = localStorage.getItem("token");
+    const params = new URLSearchParams(window.location.search);
+    const apartmentId = params.get("id");
+
+    const loginMessage = document.getElementById("loginMessage");
+    const form = document.getElementById("leaveReviewForm");
+    const apartmentInfo = document.getElementById("apartmentInfo");
+
+    if (!token) {
+      loginMessage.textContent = "⚠ Vous devez être connecté pour laisser un avis.";
+    } else if (!apartmentId) {
+      loginMessage.textContent = "⚠ Aucun appartement sélectionné. Accédez à cette page depuis la page de l'appartement.";
+    } else {
+      form.style.display = "block";
+
+      // Fetch apartment info
+      fetch(`https://localeaks-webint-erz1.onrender.com/apartment/${apartmentId}`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      })
+      .then(res => res.json())
+      .then(data => {
+        apartmentInfo.innerHTML = `
+          <div><b>Adresse :</b> ${data.address || "-"}</div>
+          <div><b>Surface :</b> ${data.size_sqm || "-"} m²</div>
+          <div><b>Chambres :</b> ${data.bedrooms || "-"}</div>
+          <div><b>Étage :</b> ${data.floor || "-"}</div>
+          <div><b>Loyer :</b> ${data.rent ? parseFloat(data.rent).toFixed(2) : "-"} €</div>
+        `;
+      })
+      .catch(err => console.error(err));
+    }
+
+    // Slider live value display
+    function updateSliderValue(sliderId, valueId) {
+      const slider = document.getElementById(sliderId);
+      const display = document.getElementById(valueId);
+      display.textContent = slider.value;
+      slider.addEventListener("input", () => {
+        display.textContent = slider.value;
+      });
+    }
+
+    ["cleanliness", "value_for_money", "amenities", "overall"].forEach(id => {
+      updateSliderValue(id, "val-" + id);
+    });
+
+    // Submit review
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const reviewData = {
+        apartment_id: parseInt(apartmentId),
+        cleanliness: parseInt(document.getElementById("cleanliness").value),
+        value_for_money: parseInt(document.getElementById("value_for_money").value),
+        amenities: parseInt(document.getElementById("amenities").value),
+        overall: parseInt(document.getElementById("overall").value),
+        comment: document.getElementById("comment").value.trim()
+      };
+
+      try {
+        const res = await fetch("https://localeaks-webint-erz1.onrender.com/reviews", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify(reviewData)
+        });
+
+        const msg = document.getElementById("formMessage");
+        if (res.ok) {
+          msg.style.color = "green";
+          msg.textContent = "Merci ! Votre avis a été enregistré.";
+          form.reset();
+        } else {
+          const text = await res.text();
+          msg.style.color = "red";
+          msg.textContent = "Erreur lors de l'envoi : " + text;
+        }
+      } catch (err) {
+        const msg = document.getElementById("formMessage");
+        msg.style.color = "red";
+        msg.textContent = "Erreur réseau : " + err.message;
+      }
+    });
+  </script>
+
+  <script src="header.js"></script>
+</body>
+</html>

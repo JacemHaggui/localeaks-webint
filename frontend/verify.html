@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vérification du compte - LocaLeaks</title>
+  <link rel="icon" href="LocaLeaksFavicon.png" type="image/png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <img src="LocaLeaksLogo.jpg" alt="LocaLeaks Logo" class="site-logo">
+    <h1>LocaLeaks</h1>
+    <p>Donner du pouvoir aux étudiants. Responsabiliser les propriétaires.</p>
+  </header>
+
+  <main>
+    <section>
+      <h2>Vérifier votre compte</h2>
+      <p>Entrez le code reçu par email :</p>
+      <form id="verifyForm">
+        <label>
+          Code de vérification
+          <input type="text" id="code" placeholder="XXXXXX" maxlength="6" required>
+        </label>
+        <button type="submit">Vérifier</button>
+        <div id="formMessage"></div>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 LocaLeaks | Par les étudiants, pour les étudiants</p>
+  </footer>
+
+  <script>
+    const form = document.getElementById('verifyForm');
+    const message = document.getElementById('formMessage');
+    const email = new URLSearchParams(window.location.search).get('email');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      message.textContent = "";
+
+      const code = document.getElementById('code').value.trim();
+
+      try {
+        const res = await fetch('https://localeaks-webint-erz1.onrender.com/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, code })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Code invalide");
+
+        message.style.color = "#4da6ff";
+        message.textContent = "Compte vérifié ! Redirection vers la connexion...";
+        setTimeout(() => {
+          window.location.href = "login.html";
+        }, 1500);
+
+      } catch (err) {
+        message.style.color = "red";
+        message.textContent = err.message;
+      }
+    });
+  </script>
+</body>
+</html>

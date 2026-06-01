@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laisser un avis - Propriétaire | LocaLeaks</title>
+  <link rel="icon" href="LocaLeaksFavicon.png" type="image/png">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    main {
+      max-width: 600px;
+      margin: 30px auto;
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px 28px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    h2, h3 { text-align: center; }
+    .slider-group {
+      margin-bottom: 16px;
+    }
+    .slider-group label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+    .slider-group input[type="range"] {
+      width: 100%;
+    }
+    .slider-value {
+      font-size: 0.9em;
+      color: #333;
+      text-align: right;
+    }
+    textarea {
+      width: 100%;
+      min-height: 90px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 8px;
+      resize: vertical;
+    }
+    button {
+      display: block;
+      margin: 20px auto 0;
+      background: #007bff;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <header id="site-header">
+    <h1><a href="index.html" style="color: inherit; text-decoration: none;">LocaLeaks</a></h1>
+  </header>
+
+  <main>
+    <h2>Laisser un avis sur le propriétaire</h2>
+    <p id="landlord-name" style="text-align:center;color:#666;margin-bottom:24px;">Chargement...</p>
+
+    <form id="reviewForm">
+      <div class="slider-group">
+        <label for="responsiveness">Réactivité</label>
+        <input type="range" id="responsiveness" min="1" max="10" value="5">
+        <div class="slider-value" id="val-responsiveness">5</div>
+      </div>
+
+      <div class="slider-group">
+        <label for="maintenance">Maintenance</label>
+        <input type="range" id="maintenance" min="1" max="10" value="5">
+        <div class="slider-value" id="val-maintenance">5</div>
+      </div>
+
+      <div class="slider-group">
+        <label for="communication">Communication</label>
+        <input type="range" id="communication" min="1" max="10" value="5">
+        <div class="slider-value" id="val-communication">5</div>
+      </div>
+
+      <div class="slider-group">
+        <label for="fairness">Équité</label>
+        <input type="range" id="fairness" min="1" max="10" value="5">
+        <div class="slider-value" id="val-fairness">5</div>
+      </div>
+
+      <div class="slider-group">
+        <label>Note globale</label>
+        <div id="overall-value" style="font-size:1.1em;font-weight:bold;text-align:center;">5.0</div>
+      </div>
+
+      <label for="comment">Commentaire (facultatif)</label>
+      <textarea id="comment" placeholder="Partage ton expérience avec ce propriétaire..."></textarea>
+
+      <button type="submit">Envoyer l’avis</button>
+    </form>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 LocaLeaks | Par les étudiants, pour les étudiants</p>
+  </footer>
+
+  <script>
+    // --- Helpers ---
+    const params = new URLSearchParams(window.location.search);
+    const landlordId = params.get("id");
+    if (!landlordId) {
+      alert("Aucun ID de propriétaire trouvé !");
+      window.location.href = "index.html";
+    }
+
+    // Fetch landlord name
+    async function fetchLandlordName() {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await fetch(`https://localeaks-webint-erz1.onrender.com/landlord/${landlordId}`, {
+          headers: { "Authorization": token ? `Bearer ${token}` : "" }
+        });
+        if (!res.ok) throw new Error("Erreur serveur");
+        const data = await res.json();
+        document.getElementById("landlord-name").textContent = data.name || "Propriétaire inconnu";
+      } catch (e) {
+        console.error(e);
+        document.getElementById("landlord-name").textContent = "Erreur de chargement";
+      }
+    }
+    fetchLandlordName();
+
+    // --- Sliders update ---
+    const sliders = ["responsiveness","maintenance","communication","fairness"];
+    sliders.forEach(id => {
+      const slider = document.getElementById(id);
+      const valueDisplay = document.getElementById("val-" + id);
+      slider.addEventListener("input", () => {
+        valueDisplay.textContent = slider.value;
+        updateOverall();
+      });
+    });
+
+    function updateOverall() {
+      const total = sliders.reduce((sum, id) => sum + parseInt(document.getElementById(id).value), 0);
+      const avg = (total / sliders.length).toFixed(1);
+      document.getElementById("overall-value").textContent = avg;
+    }
+
+    // --- Form submission ---
+    document.getElementById("reviewForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Vous devez être connecté pour laisser un avis.");
+        return;
+      }
+
+      const payload = {
+        landlord_id: parseInt(landlordId),
+        responsiveness: parseInt(document.getElementById("responsiveness").value),
+        maintenance: parseInt(document.getElementById("maintenance").value),
+        communication: parseInt(document.getElementById("communication").value),
+        fairness: parseInt(document.getElementById("fairness").value),
+        overall: parseFloat(document.getElementById("overall-value").textContent),
+        comment: document.getElementById("comment").value.trim()
+      };
+
+      try {
+        const res = await fetch("https://localeaks-webint-erz1.onrender.com/landlord-reviews", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || "Erreur d’envoi");
+        }
+
+        alert("Merci pour ton avis !");
+        window.location.href = `landlord.html?id=${landlordId}`;
+      } catch (err) {
+        console.error(err);
+        alert("Impossible d’envoyer l’avis : " + err.message);
+      }
+    });
+  </script>
+
+  <script src="header.js"></script>
+</body>
+</html>

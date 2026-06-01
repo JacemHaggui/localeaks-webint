@@ -1,0 +1,314 @@
+html, body {
+  height: 100%;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+main {
+  flex: 1;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f7f7f7;
+  color: #222;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+
+header, footer {
+  background-color: #000;
+  color: #fff;
+  text-align: center;
+}
+
+header {
+  border-bottom: 2px solid #fff;
+  padding: 20px 10px;
+}
+
+.site-logo {
+  width: 140px;
+  height: auto;
+}
+
+main {
+  padding: 20px;
+}
+
+main, section {
+  text-align: left;
+}
+
+section {
+  background: #fff;
+  margin: 30px auto;
+  padding: 24px 16px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  max-width: 800px;
+  border: 1px solid #eee;
+}
+
+/* Search bar */
+.search-bar {
+  position: relative;
+  display: inline-block;
+  margin-top: 20px;
+}
+
+.search-bar input {
+  width: 300px;
+  padding: 10px;
+}
+
+.search-bar button {
+  padding: 10px 15px;
+  background: #333;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.search-bar button:hover {
+  background: #555;
+}
+
+/* Suggestions dropdown */
+.suggestions {
+  position: absolute;
+  background: #fff;
+  border: 1px solid #ccc;
+  width: 300px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 10;
+}
+
+.suggestions div {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.suggestions div:hover {
+  background: #f0f0f0;
+}
+
+/* Map */
+#map {
+  height: 300px;
+  width: 100%;
+  margin-top: 10px;
+}
+
+/* Review card */
+.review-card {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  margin-bottom: 18px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  max-width: 700px;
+}
+
+#reviews-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-height: 500px;
+  overflow-y: auto;
+  padding: 12px 0;
+  background: #fafafa;
+  border-radius: 8px;
+  border: 1px solid #eee;
+}
+
+/* Modal styles */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 2000; /* Increase to be above Leaflet */
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+  background: #fff;
+  padding: 20px;
+  margin: 10% auto;
+  width: 300px;
+  border-radius: 8px;
+  position: relative;
+}
+
+.close {
+  position: absolute;
+  right: 10px;
+  top: 5px;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+footer {
+  margin-top: 40px;
+  padding: 20px;
+  font-size: 0.9em;
+  border-top: 1px solid #ddd;
+}
+
+/* Search results */
+.search-result {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.search-result a {
+  color: #222;
+  text-decoration: none;
+  display: block;
+}
+
+.search-result a:hover {
+  background: #f0f0f0;
+}
+
+.rating-bar-container {
+  background: #eee;
+  border-radius: 6px;
+  height: 14px;
+  width: 120px;
+  display: inline-block;
+  margin-left: 8px;
+  vertical-align: middle;
+  position: relative;
+}
+.rating-bar {
+  background: #4da6ff;
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.3s;
+}
+.rating-label {
+  min-width: 90px;
+  display: inline-block;
+}
+
+
+#landlord-suggestions {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  border-top: none;
+  max-height: 150px;
+  overflow-y: auto;
+  position: absolute;
+  width: 100%;
+  background: #fff;
+  z-index: 1000;
+  display: none;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+#landlord-suggestions div {
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+#landlord-suggestions div:hover {
+  background-color: #f0f4ff;
+}
+
+input, textarea, button {
+  font-size: 1rem;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+button {
+  background-color: #1976d2;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  margin-top: 12px;
+  padding: 10px;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+button:hover {
+  background-color: #115293;
+}
+
+label {
+  display: block;
+  margin-bottom: 16px;
+  font-weight: 500;
+  color: #333;
+  position: relative;
+}
+
+#formMessage {
+  margin-top: 12px;
+  font-weight: bold;
+  color: #1976d2;
+}
+
+#address-suggestions {
+  border: 1px solid #ccc;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  max-height: 150px;
+  overflow-y: auto;
+  position: absolute;
+  width: 100%;
+  background: #fff;
+  z-index: 1000;
+  display: none;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+#address-suggestions div {
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+#address-suggestions div:hover {
+  background-color: #f0f4ff;
+}
+
+.header-content {
+    position: relative; /* parent for absolute positioning */
+}
+
+.nav-buttons {
+    position: absolute;
+    top: 20px;    /* distance from top of header */
+    right: 20px;  /* distance from right edge */
+    display: flex;
+    gap: 10px;
+}
+
+.nav-buttons button {
+    padding: 5px 12px;
+    background-color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    color: rgb(0, 0, 0);
+    cursor: pointer;
+}
+
+.nav-buttons button:hover {
+    background-color: #c9c9c9;
+}
+
+input[type="checkbox"] {
+  width: auto;  /* don’t stretch checkbox */
+  margin: 0;    /* optional: remove any extra margin */
+}
