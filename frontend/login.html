@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connexion - LocaLeaks</title>
+  <link rel="icon" href="LocaLeaksFavicon.png" type="image/png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <img src="LocaLeaksLogo.jpg" alt="LocaLeaks Logo" class="site-logo">
+    <h1>LocaLeaks</h1>
+    <p>Donner du pouvoir aux étudiants. Responsabiliser les propriétaires.</p>
+  </header>
+
+  <main>
+    <section>
+      <h2>Connexion</h2>
+      <form id="loginForm">
+        <label>
+          Email
+          <input type="email" id="email" placeholder="Votre email" required>
+        </label>
+        <label>
+          Mot de passe
+          <input type="password" id="password" placeholder="Mot de passe" required>
+        </label>
+        <button type="submit">Se connecter</button>
+        <div id="formMessage"></div>
+      </form>
+      <p>Pas encore de compte ? <a href="register.html">Inscrivez-vous</a></p>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 LocaLeaks | Par les étudiants, pour les étudiants</p>
+  </footer>
+  <script>
+  const form = document.getElementById('loginForm');
+  const message = document.getElementById('formMessage');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    message.textContent = "";
+
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+
+    try {
+      const formData = new URLSearchParams();
+      formData.append('username', email); // note: username, not email
+      formData.append('password', password);
+
+      const res = await fetch('https://localeaks-webint-erz1.onrender.com/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: formData
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "Erreur de connexion");
+
+      localStorage.setItem('token', data.access_token);
+      message.style.color = "#4da6ff";
+      message.textContent = "Connexion réussie ! Redirection...";
+      setTimeout(() => {
+        window.location.href = "index.html";
+      }, 1000);
+
+    } catch (err) {
+      message.style.color = "red";
+      message.textContent = err.message;
+    }
+  });
+  </script>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profil - LocaLeaks</title>
+  <link rel="icon" href="LocaLeaksFavicon.png" type="image/png">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Modal specific styling */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 2000;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+    }
+    .modal-content {
+      background: #fff;
+      padding: 20px;
+      margin: 10% auto;
+      width: 320px;
+      border-radius: 8px;
+      position: relative;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+    }
+    .modal-content h3 { margin-top: 0; color: #d32f2f; }
+    .modal-content input[type="password"],
+    .modal-content input[type="text"] {
+      width: 100%;
+      padding: 8px;
+      margin: 6px 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+    .modal-content label { font-size: 0.9rem; display: block; margin: 8px 0; }
+    .modal-content button {
+      background-color: #d32f2f;
+      color: #fff;
+      padding: 10px;
+      width: 100%;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .modal-content button:hover { background-color: #b71c1c; }
+    .close {
+      position: absolute;
+      right: 10px; top: 5px;
+      font-size: 22px;
+      cursor: pointer;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <img src="LocaLeaksLogo.jpg" alt="LocaLeaks Logo" class="site-logo">
+  <h1 style="cursor: pointer;" onclick="window.location.href='index.html'">LocaLeaks</h1>
+  <p>Donner du pouvoir aux étudiants. Responsabiliser les propriétaires.</p>
+  <div id="navbar" class="navbar"></div>
+</header>
+
+<main>
+  <section>
+    <h2>Mon profil</h2>
+    <p><strong>Nom:</strong> <span id="profileName"></span></p>
+    <p><strong>Email:</strong> <span id="profileEmail"></span></p>
+    <button id="logoutBtn">Déconnexion</button>
+    <button id="deleteAccountBtn" style="background-color: #d32f2f; color: #fff; margin-top: 10px;">Supprimer mon compte</button>
+  </section>
+</main>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="modal">
+  <div class="modal-content">
+    <span class="close" id="closeDeleteModal">&times;</span>
+    <h3>Suppression du compte</h3>
+    <p>Cette action est <strong>irréversible</strong> et supprimera instantanément toutes vos données.</p>
+    <p>Pour confirmer, entrez votre mot de passe et tapez <strong>DELETE</strong> ci-dessous :</p>
+    <input type="password" id="deletePassword" placeholder="Mot de passe">
+    <input type="text" id="deleteConfirmText" placeholder="Tapez DELETE pour confirmer">
+
+    <label><input type="checkbox" id="deleteReviews"> Supprimer toutes mes reviews (optionnel)</label>
+    
+    <p style="font-size:0.85rem; color:#555; margin-top:8px;">
+      Si vous ne supprimez pas vos reviews, votre nom sera remplacé par <strong>Ex-LocaLeaker</strong>.
+    </p>
+    <button id="confirmDeleteBtn">Supprimer mon compte</button>
+  </div>
+</div>
+
+<footer>
+  <p>&copy; 2025 LocaLeaks | Par les étudiants, pour les étudiants</p>
+</footer>
+
+<script src="header.js"></script>
+<script>
+  const token = localStorage.getItem('token');
+  if (!token) window.location.href = "login.html";
+
+  // Fetch profile info
+  fetch('https://localeaks-webint-erz1.onrender.com/me', {
+    headers: { 'Authorization': 'Bearer ' + token }
+  })
+  .then(res => {
+    if (!res.ok) throw new Error("Token invalide");
+    return res.json();
+  })
+  .then(data => {
+    document.getElementById('profileName').textContent = data.name;
+    document.getElementById('profileEmail').textContent = data.email;
+  })
+  .catch(() => {
+    localStorage.removeItem('token');
+    window.location.href = "login.html";
+  });
+
+  // Logout
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    localStorage.removeItem('token');
+    window.location.href = "index.html";
+  });
+
+  // Delete account modal
+  const deleteBtn = document.getElementById('deleteAccountBtn');
+  const deleteModal = document.getElementById('deleteModal');
+  const closeDeleteModal = document.getElementById('closeDeleteModal');
+  const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+
+  deleteBtn.addEventListener('click', () => deleteModal.style.display = 'block');
+  closeDeleteModal.addEventListener('click', () => deleteModal.style.display = 'none');
+  window.addEventListener('click', e => { if(e.target === deleteModal) deleteModal.style.display = 'none'; });
+
+  confirmDeleteBtn.addEventListener('click', async () => {
+    const password = document.getElementById('deletePassword').value;
+    const confirmText = document.getElementById('deleteConfirmText').value.trim();
+    const deleteReviews = document.getElementById('deleteReviews').checked;
+
+    if (!password || confirmText !== "DELETE") {
+      alert("Veuillez entrer votre mot de passe et taper DELETE pour confirmer.");
+      return;
+    }
+
+    try {
+      const res = await fetch("https://localeaks-webint-erz1.onrender.com/me", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + token
+        },
+        body: JSON.stringify({ password, deleteReviews })
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.detail || "Impossible de supprimer le compte");
+      }
+
+      alert("Votre compte a été supprimé.");
+      localStorage.removeItem('token');
+      window.location.href = "index.html";
+
+    } catch (err) {
+      alert("Erreur : " + err.message);
+    }
+  });
+</script>
+</body>
+</html>

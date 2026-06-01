@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ajouter un appartement - LocaLeaks</title>
+  <link rel="icon" href="LocaLeaksFavicon.png" type="image/png">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    label {
+      display: block;
+      margin-bottom: 12px;
+      position: relative;
+    }
+
+    #landlord-suggestions, #address-suggestions {
+      border: 1px solid #ccc;
+      border-top: none;
+      max-height: 120px;
+      overflow-y: auto;
+      position: absolute;
+      width: 100%;
+      background: #fff;
+      z-index: 1000;
+      display: none;
+    }
+
+    #landlord-suggestions div, #address-suggestions div {
+      padding: 6px;
+      cursor: pointer;
+    }
+
+    #landlord-suggestions div:hover, #address-suggestions div:hover {
+      background-color: #f0f0f0;
+    }
+
+    .form-section {
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .form-section:last-of-type {
+      border-bottom: none;
+    }
+
+    .form-section h3 {
+      margin-top: 0;
+      margin-bottom: 15px;
+      color: #333;
+    }
+
+    .checkbox-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      width: fit-content;
+    }
+
+    .checkbox-item input[type="checkbox"] {
+      margin: 0;
+      margin-right: 6px;
+      flex-shrink: 0;
+      width: auto;
+    }
+
+    .checkbox-item label {
+      margin: 0;
+      padding: 0;
+      display: inline-block;
+      position: static;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      justify-content: center; align-items: center;
+      z-index: 2000;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      width: 300px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+
+    .modal-content h3 {
+      margin-top: 0;
+    }
+
+    .modal-content button {
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .modal-content button:hover {
+      background: #0056b3;
+    }
+
+    .close-btn {
+      background: #ccc;
+      float: right;
+    }
+
+    button[type="submit"] {
+      padding: 10px 16px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #0056b3;
+    }
+
+    #formMessage {
+      margin-top: 12px;
+      color: green;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <header id="site-header">
+    <h1>
+      <a href="index.html" style="color: inherit; text-decoration: none;">LocaLeaks</a>
+    </h1>
+  </header>
+
+<main>
+  <section>
+    <h2>Ajouter un appartement</h2>
+    <form id="addApartmentForm">
+      
+      <!-- Section: Location -->
+      <div class="form-section">
+        <h3>Localisation</h3>
+        <label>
+          Adresse:
+          <input type="text" id="address" name="address" required autocomplete="off">
+          <div id="address-suggestions"></div>
+        </label>
+      </div>
+
+      <!-- Section: Landlord -->
+      <div class="form-section">
+        <h3>Propriétaire</h3>
+        <label>
+          Nom du propriétaire:
+          <input type="text" id="landlord-name" autocomplete="off" required>
+          <input type="hidden" id="landlord-id" name="landlord_id">
+          <div id="landlord-suggestions"></div>
+        </label>
+      </div>
+
+      <!-- Section: Apartment Details -->
+      <div class="form-section">
+        <h3>Détails de l'appartement</h3>
+        <label>
+          Numéro d'appartement:
+          <input type="text" id="apartmentNumber" name="apartmentNumber">
+        </label>
+        <label>
+          Étage:
+          <input type="number" id="floor" name="floor">
+        </label>
+        <label>
+          Nombre de chambres:
+          <input type="number" id="bedrooms" name="bedrooms" min="0" required>
+        </label>
+        <label>
+          Nombre de salles de bain:
+          <input type="number" id="bathrooms" name="bathrooms" min="0" required>
+        </label>
+        <label>
+          Surface (m²):
+          <input type="number" id="size" name="size" min="0">
+        </label>
+        <label>
+          Description (balcon, ascenseur, etc.):
+          <textarea id="features" name="features"></textarea>
+        </label>
+      </div>
+
+      <!-- Section: Rent & Charges -->
+      <div class="form-section">
+        <h3>Loyer et Charges</h3>
+        <label>
+          Loyer (hors charges) (€):
+          <input type="number" id="rent_amount" name="rent_amount" min="0" step="0.01" required>
+        </label>
+
+        <label>
+          Montant des charges (€):
+          <input type="number" id="charges_amount" name="charges_amount" min="0" step="0.01" required>
+        </label>
+
+        <label>
+          Charges incluses :
+          <div class="checkbox-group">
+            <div class="checkbox-item">
+              <input type="checkbox" id="water_included">
+              <label for="water_included">Eau</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="electricity_included">
+              <label for="electricity_included">Électricité</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="heating_included">
+              <label for="heating_included">Chauffage</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="internet_included">
+              <label for="internet_included">Internet</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="copropriete_included">
+              <label for="copropriete_included">Copropriété</label>
+            </div>
+          </div>
+        </label>
+      </div>
+
+      <button type="submit">Ajouter</button>
+    </form>
+    <div id="formMessage"></div>
+  </section>
+</main>
+
+<footer>
+  <p>&copy; 2025 LocaLeaks | Par les étudiants, pour les étudiants</p>
+</footer>
+
+<!-- Modal for new landlord -->
+<div id="landlordModal" class="modal">
+  <div class="modal-content">
+    <button class="close-btn" id="closeModal">X</button>
+    <h3>Ajouter un nouveau propriétaire</h3>
+    <form id="newLandlordForm">
+      <label>Nom: <input type="text" id="newLandlordName" required></label>
+      <label>Email: <input type="email" id="newLandlordEmail"></label>
+      <label>Téléphone: <input type="tel" id="newLandlordPhone"></label>
+      <button type="submit">Créer le propriétaire</button>
+    </form>
+  </div>
+</div>
+
+
+<script>
+const token = localStorage.getItem("token"); // get auth token
+
+// --- RED LOGIN WARNING ---
+if (!token) {
+  const mainSection = document.querySelector("main section");
+  const warning = document.createElement("p");
+  warning.textContent = " Vous devez être connecté pour ajouter un appartement !";
+  warning.style.color = "red";
+  warning.style.fontWeight = "bold";
+  warning.style.marginBottom = "16px";
+  mainSection.prepend(warning);
+
+  // Disable the form
+  const form = document.getElementById("addApartmentForm");
+  Array.from(form.elements).forEach(el => el.disabled = true);
+
+  // Stop execution so nothing else runs
+  throw new Error("User not logged in. Form disabled.");
+}
+
+// Prefill address from URL
+const params = new URLSearchParams(window.location.search);
+document.getElementById("address").value = decodeURIComponent(params.get("label") || "");
+
+// --- LANDLORD AUTOCOMPLETE & MODAL ---
+const landlordNameInput = document.getElementById("landlord-name");
+const landlordIdInput = document.getElementById("landlord-id");
+const suggestionsBox = document.getElementById("landlord-suggestions");
+const modal = document.getElementById("landlordModal");
+
+landlordNameInput.addEventListener("input", async () => {
+  const query = landlordNameInput.value.trim();
+  if (!query) { suggestionsBox.style.display = "none"; return; }
+
+  try {
+    const res = await fetch(`https://localeaks-webint-erz1.onrender.com/landlords?search=${encodeURIComponent(query)}`, {
+      headers: { "Authorization": token ? `Bearer ${token}` : "" }
+    });
+    const data = await res.json();
+
+    suggestionsBox.innerHTML = "";
+    if (data.length === 0) {
+      const addOption = document.createElement("div");
+      addOption.textContent = `➕ Ajouter "${query}"`;
+      addOption.style.fontStyle = "italic";
+      addOption.addEventListener("click", () => {
+        document.getElementById("newLandlordName").value = query;
+        modal.style.display = "flex";
+        suggestionsBox.style.display = "none";
+      });
+      suggestionsBox.appendChild(addOption);
+      suggestionsBox.style.display = "block";
+      return;
+    }
+
+    data.forEach(l => {
+      const div = document.createElement("div");
+      div.textContent = l.name;
+      div.addEventListener("click", () => {
+        landlordNameInput.value = l.name;
+        landlordIdInput.value = l.id;
+        suggestionsBox.style.display = "none";
+      });
+      suggestionsBox.appendChild(div);
+    });
+    suggestionsBox.style.display = "block";
+  } catch (err) { console.error(err); }
+});
+
+document.addEventListener("click", (e) => {
+  if (e.target !== landlordNameInput) suggestionsBox.style.display = "none";
+});
+
+document.getElementById("closeModal").addEventListener("click", () => modal.style.display = "none");
+
+document.getElementById("newLandlordForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const name = document.getElementById("newLandlordName").value.trim();
+  const email = document.getElementById("newLandlordEmail").value.trim();
+  const phone = document.getElementById("newLandlordPhone").value.trim();
+
+  try {
+    const res = await fetch("https://localeaks-webint-erz1.onrender.com/landlords", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": token ? `Bearer ${token}` : ""
+      },
+      body: JSON.stringify({ name, email, phone })
+    });
+
+    if (!res.ok) throw new Error("Erreur lors de la création.");
+    const newLandlord = await res.json();
+
+    landlordNameInput.value = newLandlord.name;
+    landlordIdInput.value = newLandlord.id;
+    modal.style.display = "none";
+  } catch (err) {
+    alert("Erreur : impossible de créer le propriétaire.");
+  }
+});
+
+// --- ADD APARTMENT ---
+document.getElementById("addApartmentForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  if (!landlordIdInput.value) {
+    document.getElementById("formMessage").textContent = "Veuillez sélectionner ou créer un propriétaire.";
+    return;
+  }
+
+  const formData = {
+      landlord_id: parseInt(landlordIdInput.value),
+      number: document.getElementById("apartmentNumber").value || null,
+      floor: document.getElementById("floor").value ? parseInt(document.getElementById("floor").value) : null,
+      bedrooms: parseInt(document.getElementById("bedrooms").value),
+      bathrooms: parseInt(document.getElementById("bathrooms").value),
+      size_sqm: document.getElementById("size").value ? parseFloat(document.getElementById("size").value) : null,
+      features: document.getElementById("features").value || null,
+      address: document.getElementById("address").value,
+      apartment_rent: {
+        amount: parseFloat(document.getElementById("rent_amount").value),
+        month: new Date().getMonth() + 1,
+        year: new Date().getFullYear()
+      },
+      apartment_charges: {
+        amount: parseFloat(document.getElementById("charges_amount").value),
+        water_included: document.getElementById("water_included").checked,
+        electricity_included: document.getElementById("electricity_included").checked,
+        heating_included: document.getElementById("heating_included").checked,
+        internet_included: document.getElementById("internet_included").checked,
+        copropriete_included: document.getElementById("copropriete_included").checked,
+        month: new Date().getMonth() + 1,
+        year: new Date().getFullYear()
+      }
+  };
+
+  try {
+    const res = await fetch("https://localeaks-webint-erz1.onrender.com/apartments", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": token ? `Bearer ${token}` : ""
+      },
+      body: JSON.stringify(formData)
+    });
+
+    if (res.ok) {
+      document.getElementById("formMessage").textContent = "Appartement ajouté avec succès !";
+      document.getElementById("addApartmentForm").reset();
+      landlordIdInput.value = "";
+    } else {
+      const errorText = await res.text();
+      document.getElementById("formMessage").textContent = "Erreur lors de l'ajout : " + errorText;
+    }
+  } catch (err) {
+    document.getElementById("formMessage").textContent = "Erreur réseau : " + err.message;
+  }
+});
+
+// --- ADDRESS AUTOCOMPLETE ---
+const addressInput = document.getElementById("address");
+const addressSuggestions = document.getElementById("address-suggestions");
+let debounceAddress = null;
+
+async function fetchAddress(query) {
+  const lonMin = 6.669, latMin = 43.407, lonMax = 7.865, latMax = 44.234;
+  const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&addressdetails=1&limit=5&viewbox=${lonMin},${latMax},${lonMax},${latMin}&bounded=1`;
+  const res = await fetch(url, { headers: { "Accept-Language": "fr" } });
+  return await res.json();
+}
+
+function formatAddress(place) {
+  const addr = place.address || {};
+  let label = "";
+  if (addr.house_number) label += addr.house_number + " ";
+  if (addr.road) label += addr.road;
+  if (addr.postcode) label += ", " + addr.postcode;
+  if (addr.city) label += " " + addr.city;
+  return label || place.display_name;
+}
+
+function showAddressSuggestions(suggestions) {
+  addressSuggestions.innerHTML = "";
+  suggestions.forEach(place => {
+    const div = document.createElement("div");
+    div.textContent = formatAddress(place);
+    div.addEventListener("click", () => {
+      addressInput.value = formatAddress(place);
+      addressSuggestions.style.display = "none";
+    });
+    addressSuggestions.appendChild(div);
+  });
+  addressSuggestions.style.display = suggestions.length ? "block" : "none";
+}
+
+addressInput.addEventListener("input", () => {
+  clearTimeout(debounceAddress);
+  const query = addressInput.value.trim();
+  if (query.length < 3) { addressSuggestions.style.display = "none"; return; }
+  debounceAddress = setTimeout(async () => {
+    const results = await fetchAddress(query);
+    showAddressSuggestions(results);
+  }, 300);
+});
+
+document.addEventListener("click", (e) => {
+  if (e.target !== addressInput) addressSuggestions.style.display = "none";
+});
+</script>
+
+<script src="header.js"></script>
+</body>
+</html>

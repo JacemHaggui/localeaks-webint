@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Appartement - LocaLeaks</title>
+  <link rel="icon" href="LocaLeaksFavicon.png" type="image/png">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .apartment-photos {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+    .apartment-photos img {
+      width: 160px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      background: #fafafa;
+    }
+    .apartment-details { margin-bottom: 18px; }
+    .landlord-link {
+      color: #1976d2;
+      text-decoration: underline;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .rating-bar-container {
+      background: #e0e0e0;
+      border-radius: 4px;
+      overflow: hidden;
+      height: 8px;
+      width: 100%;
+      margin: 4px 0;
+    }
+    .rating-bar {
+      background: #4caf50;
+      height: 100%;
+      transition: width 0.3s;
+    }
+    .rating-label { font-size: 0.9em; color: #333; margin-bottom: 2px; }
+    .review-card {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      margin-bottom: 18px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      
+      /* Make it fill the container */
+      width: 98%;
+      max-width: none; /* override previous limit */
+      box-sizing: border-box; /* ensure padding is included */
+    }
+
+  </style>
+</head>
+<body>
+  <header id="site-header">
+    <h1>
+      <a href="index.html" style="color: inherit; text-decoration: none;">LocaLeaks</a>
+    </h1>
+  </header>
+
+  <main>
+    <section id="apartment-info">
+      <h2 id="apartment-address">Chargement...</h2>
+      <div class="apartment-details">
+        <div><b>Surface :</b> <span id="apartment-surface">-</span> m²</div>
+        <div><b>Type :</b> <span id="apartment-type">-</span></div>
+        <div><b>Étage :</b> <span id="apartment-floor">-</span></div>
+        <div><b>Loyer :</b> <span id="apartment-rent">-</span> €/mois</div>
+        <div><b>Charges :</b> <span id="apartment-charges">-</span></div>
+        <div><b>Propriétaire :</b> <a id="landlord-link" class="landlord-link" href="#">Chargement...</a></div>
+      </div>
+      <div class="apartment-photos" id="apartment-photos"></div>
+      <div id="apartment-stats" style="margin: 18px 0; background: #f5faff; border-radius: 8px; padding: 16px; max-width: 400px;">
+        <h3 style="margin-top: 0;">Moyennes des avis</h3>
+        <div>
+          <div class="rating-label">Propreté</div>
+          <div style="display:flex;align-items:center;">
+            <div class="rating-bar-container"><div class="rating-bar" id="bar-avg-cleanliness"></div></div>
+            <span style="margin-left:8px;"><b id="avg-cleanliness">-</b>/10</span>
+          </div>
+        </div>
+        <div>
+          <div class="rating-label">État général</div>
+          <div style="display:flex;align-items:center;">
+            <div class="rating-bar-container"><div class="rating-bar" id="bar-avg-condition"></div></div>
+            <span style="margin-left:8px;"><b id="avg-condition">-</b>/10</span>
+          </div>
+        </div>
+        <div>
+          <div class="rating-label">Confort</div>
+          <div style="display:flex;align-items:center;">
+            <div class="rating-bar-container"><div class="rating-bar" id="bar-avg-comfort"></div></div>
+            <span style="margin-left:8px;"><b id="avg-comfort">-</b>/10</span>
+          </div>
+        </div>
+        <div>
+          <div class="rating-label">Note globale</div>
+          <div style="display:flex;align-items:center;">
+            <div class="rating-bar-container"><div class="rating-bar" id="bar-avg-overall"></div></div>
+            <span style="margin-left:8px;"><b id="avg-overall">-</b>/10</span>
+          </div>
+        </div>
+        <div style="margin-top:8px;">Nombre d’avis : <span id="review-count">0</span></div>
+      </div>
+
+      <div style="text-align:center; margin-top:16px;">
+        <button id="leaveReviewBtn" style="padding:10px 16px; background:#1976d2; color:#fff; border:none; border-radius:4px; cursor:pointer;">
+          Laisser un avis
+        </button>
+      </div>
+
+    </section>
+
+    <section id="apartment-reviews">
+      <h3>Avis sur l'appartement</h3>
+      <div id="reviews-list">Chargement...</div>
+    </section>
+
+  </main>
+
+  <footer>
+    <p>&copy; 2025 LocaLeaks | Par les étudiants, pour les étudiants</p>
+  </footer>
+
+  <script>
+    function getQueryParam(name) {
+      const params = new URLSearchParams(window.location.search);
+      return params.get(name);
+    }
+
+    function getBarColor(score) {
+      const r = score < 5 ? 255 : Math.round(255 - (score - 5) * 51);
+      const g = score > 5 ? 255 : Math.round(score * 51);
+      return `rgb(${r},${g},80)`;
+    }
+
+    const apartmentId = getQueryParam("id");
+    if (!apartmentId) {
+      alert("Aucun ID d'appartement fourni !");
+      throw new Error("Missing apartment ID in URL");
+    }
+
+    async function fetchApartmentData(id) {
+      const token = localStorage.getItem("token");
+
+      try {
+        const response = await fetch(`https://localeaks-webint-erz1.onrender.com/apartment/${id}`, {
+          headers: {
+            "Authorization": token ? `Bearer ${token}` : ""
+          }
+        });
+
+        if (response.status === 401) {
+          alert("Veuillez vous connecter ou créer un compte pour accéder à cette fonctionnalité.");
+          return null;
+        }
+
+        if (!response.ok) throw new Error("Erreur réseau");
+
+        return await response.json();
+      } catch (err) {
+        console.error(err);
+        alert("Impossible de récupérer les données de l'appartement depuis le serveur.");
+        return null;
+      }
+    }
+
+    function renderApartment(data) {
+      if (!data) return;
+
+      document.getElementById("apartment-address").textContent = data.address || "-";
+      document.getElementById("apartment-surface").textContent = data.size_sqm || "-";
+      document.getElementById("apartment-type").textContent = `${data.bedrooms || 0} chambres`;
+      document.getElementById("apartment-floor").textContent = data.floor || "-";
+      document.getElementById("apartment-rent").textContent = data.rent ? parseFloat(data.rent).toFixed(2) : "-";
+
+      document.getElementById("apartment-charges").textContent = data.charges
+        ? `${parseFloat(data.charges.charges_amount).toFixed(2)} € (${[
+            data.charges.water ? "Eau" : null,
+            data.charges.electricity ? "Électricité" : null,
+            data.charges.heating ? "Chauffage" : null,
+            data.charges.internet ? "Internet" : null,
+            data.charges.copropriete ? "Copropriété" : null
+          ].filter(Boolean).join(", ")})`
+        : "-";
+
+      const landlordLink = document.getElementById("landlord-link");
+      if (data.landlord) {
+        landlordLink.textContent = data.landlord.name;
+        landlordLink.href = `landlord.html?id=${data.landlord.id}`;
+      } else {
+        landlordLink.textContent = "Inconnu";
+        landlordLink.removeAttribute("href");
+      }
+
+      const photosContainer = document.getElementById("apartment-photos");
+      photosContainer.innerHTML = "";
+      if (data.photos && data.photos.length > 0) {
+        data.photos.forEach(url => {
+          const img = document.createElement("img");
+          img.src = url;
+          img.alt = "Photo appartement";
+          photosContainer.appendChild(img);
+        });
+      } else {
+        photosContainer.textContent = "Aucune photo disponible.";
+      }
+
+      const avg = data.average_reviews || {};
+      document.getElementById("avg-cleanliness").textContent = (avg.cleanliness || 0).toFixed(1);
+      document.getElementById("avg-condition").textContent = (avg.value || 0).toFixed(1);
+      document.getElementById("avg-comfort").textContent = (avg.amenities || 0).toFixed(1);
+      document.getElementById("avg-overall").textContent = (avg.overall || 0).toFixed(1);
+      document.getElementById("review-count").textContent = avg.review_count || 0;
+
+      document.getElementById("bar-avg-cleanliness").style.width = ((avg.cleanliness || 0)*10) + "%";
+      document.getElementById("bar-avg-condition").style.width = ((avg.value || 0)*10) + "%";
+      document.getElementById("bar-avg-comfort").style.width = ((avg.amenities || 0)*10) + "%";
+      document.getElementById("bar-avg-overall").style.width = ((avg.overall || 0)*10) + "%";
+
+      const reviewsList = document.getElementById("reviews-list");
+      reviewsList.innerHTML = "";
+      if (!data.reviews || data.reviews.length === 0) {
+        reviewsList.textContent = "Aucun avis pour cet appartement.";
+      } else {
+        data.reviews.forEach(r => {
+          const div = document.createElement("div");
+          div.className = "review-card";
+          div.innerHTML = `
+            <div style="display:flex;align-items:center;gap:12px;">
+              <img src="LocaLeaksFavicon.png" alt="Profil" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:1px solid #ccc;">
+              <div style="flex:1;">
+                <strong>${r.student_name}</strong>
+                <span style="color:#888; font-size:0.9em; float:right; margin-left: 10px;">
+                ${new Date(r.created_at).toLocaleDateString()}
+                </span>
+              </div>
+            </div>
+            <div style="margin:10px 0 0 0;">
+              <div class="rating-label">Propreté</div>
+              <div class="rating-bar-container"><div class="rating-bar" style="width:${r.cleanliness*10}%;background:${getBarColor(r.cleanliness)}"></div></div>
+              <span><b>${r.cleanliness}</b>/10</span>
+            </div>
+            <div>
+              <div class="rating-label">État général</div>
+              <div class="rating-bar-container"><div class="rating-bar" style="width:${r.value_for_money*10}%;background:${getBarColor(r.value_for_money)}"></div></div>
+              <span><b>${r.value_for_money}</b>/10</span>
+            </div>
+            <div>
+              <div class="rating-label">Confort</div>
+              <div class="rating-bar-container"><div class="rating-bar" style="width:${r.amenities*10}%;background:${getBarColor(r.amenities)}"></div></div>
+              <span><b>${r.amenities}</b>/10</span>
+            </div>
+            <div>
+              <div class="rating-label">Note globale</div>
+              <div class="rating-bar-container"><div class="rating-bar" style="width:${r.overall*10}%;background:${getBarColor(r.overall)}"></div></div>
+              <span><b>${r.overall}</b>/10</span>
+            </div>
+            <div style="margin-top:8px;">${r.comment || ""}</div>
+          `;
+          reviewsList.appendChild(div);
+        });
+      }
+    }
+
+    (async () => {
+      const data = await fetchApartmentData(apartmentId);
+      renderApartment(data);
+    })();
+
+    const leaveReviewBtn = document.getElementById("leaveReviewBtn");
+    leaveReviewBtn.addEventListener("click", () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("⚠ Vous devez être connecté pour laisser un avis.");
+        return;
+      }
+      // Redirect to review page with apartment ID
+      window.location.href = `leave_review.html?id=${apartmentId}`;
+    });
+
+  </script>
+  <script src="header.js"></script>
+
+
+
+</body>
+</html>
