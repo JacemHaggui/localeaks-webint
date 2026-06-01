@@ -23,12 +23,14 @@ localeaks-webint/
 |   |-- AutoUpdates.sql               SQL automation/update script.
 |   |-- CreateLocaLeaksDatabase.sql   Main database creation script.
 |   `-- auto_update_deletion.sql      SQL script for automatic deletion/update behavior.
+|-- data/                             Static data files for local testing.
+|   `-- apartments.json               Local apartment data used for development and testing.
 |-- frontend/                         Static website files shown to users in the browser.
 |   |-- LocaLeaksFavicon.png          Browser tab icon.
 |   |-- LocaLeaksLogo.jpg             LocaLeaks logo image.
 |   |-- add_apartment.html            Page for adding a new apartment.
-|   |-- address.html                  Address search page.
-|   |-- apartment.html                Apartment detail page.
+|   |-- address.html                  Address search page with interactive map.
+|   |-- apartment.html                Apartment detail page with photo and video gallery.
 |   |-- config.js                     Stores the backend API URL used by the frontend.
 |   |-- header.js                     Shared navigation/header behavior.
 |   |-- index.html                    Homepage.
@@ -39,8 +41,8 @@ localeaks-webint/
 |   |-- profile.html                  User profile/account page.
 |   |-- register.html                 Account creation page.
 |   |-- results.html                  Search results page.
-|   |-- script.js                     Main frontend JavaScript logic.
-|   |-- style.css                     Main website styling.
+|   |-- script.js                     Main frontend JavaScript logic including address autocomplete and local address suggestions.
+|   |-- style.css                     Main website styling including media gallery layout.
 |   `-- verify.html                   Email verification page.
 |-- localeaks-backend/                FastAPI backend and database access code.
 |   |-- app.py                        Main API server with routes and authentication.
