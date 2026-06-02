@@ -275,6 +275,22 @@ document.addEventListener("DOMContentLoaded", async () => {
   const data = await fetchLandlordData(landlordId);
   renderLandlord(data);
 });
+
+document.addEventListener("DOMContentLoaded", () => {
+  const addBtn = document.getElementById("add-review-btn");
+  const warning = document.getElementById("login-warning");
+
+  addBtn.addEventListener("click", () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      warning.style.display = "block";
+    } else {
+      window.location.href = `leave_review_landlord.html?id=${landlordId}`;
+    }
+  });
+});
+
 </script>
 
 <script src="header.js"></script>
