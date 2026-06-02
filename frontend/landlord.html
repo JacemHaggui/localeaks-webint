@@ -6,8 +6,8 @@
   <title>Propriétaire - LocaLeaks</title>
   <link rel="icon" href="LocaLeaksFavicon.png" type="image/png">
   <link rel="stylesheet" href="style.css">
+
   <style>
-    /* Styles for landlord page */
     .review-card {
       background: #fff;
       border: 1px solid #ddd;
@@ -15,12 +15,10 @@
       margin-bottom: 18px;
       padding: 16px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-      
-      /* Make it fill the container */
       width: 98%;
-      max-width: none; /* override previous limit */
-      box-sizing: border-box; /* ensure padding is included */
+      box-sizing: border-box;
     }
+
     #reviews-list {
       display: flex;
       flex-direction: column;
@@ -32,14 +30,17 @@
       border-radius: 8px;
       border: 1px solid #eee;
     }
+
     .contact-list {
       list-style: none;
       padding: 0;
       margin: 0;
     }
+
     .contact-list li {
       margin-bottom: 6px;
     }
+
     .rating-bar-container {
       background: #e0e0e0;
       border-radius: 4px;
@@ -48,18 +49,20 @@
       width: 100%;
       margin: 4px 0;
     }
+
     .rating-bar {
       background: #4caf50;
       height: 100%;
       transition: width 0.3s;
     }
+
     .rating-label {
       font-size: 0.9em;
       color: #333;
       margin-bottom: 2px;
     }
+
     #add-review-btn {
-      display: inline-block;
       margin-top: 12px;
       padding: 10px 18px;
       background: #007BFF;
@@ -68,236 +71,212 @@
       border-radius: 8px;
       cursor: pointer;
       font-weight: bold;
-      transition: background 0.3s;
     }
+
     #add-review-btn:hover {
       background: #0056b3;
     }
+
     #login-warning {
       color: red;
       margin-top: 8px;
       font-weight: bold;
       display: none;
     }
+
+    /* Apartments */
+    #apartments-list {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .apartment-card {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 10px;
+      background: #fff;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .apartment-card:hover {
+      background: #f5f5f5;
+    }
   </style>
 </head>
+
 <body>
-  <header id="site-header">
-    <h1>
-      <a href="index.html" style="color: inherit; text-decoration: none;">LocaLeaks</a>
-    </h1>
-  </header>
+<header id="site-header">
+  <h1>
+    <a href="index.html" style="color: inherit; text-decoration: none;">LocaLeaks</a>
+  </h1>
+</header>
 
-  <main>
-    <section id="landlord-info">
-      <h2 id="landlord-name">Chargement...</h2>
-      <ul class="contact-list">
-        <li>Email : <span id="landlord-email">Chargement...</span></li>
-        <li>Téléphone : <span id="landlord-phone">Chargement...</span></li>
-        <li>Adresse : <span id="landlord-address">Chargement...</span></li>
-      </ul>
+<main>
 
-      <div id="landlord-stats" style="margin: 18px 0; background: #f5faff; border-radius: 8px; padding: 16px; max-width: 400px;">
-        <h3 style="margin-top: 0;">Moyennes des avis</h3>
-        <div>
-          <div class="rating-label">Réactivité</div>
-          <div style="display:flex;align-items:center;">
-            <div class="rating-bar-container">
-              <div class="rating-bar" id="bar-avg-responsiveness"></div>
-            </div>
-            <span style="margin-left:8px;"><b id="avg-responsiveness">-</b>/10</span>
-          </div>
-        </div>
-        <div>
-          <div class="rating-label">Maintenance</div>
-          <div style="display:flex;align-items:center;">
-            <div class="rating-bar-container">
-              <div class="rating-bar" id="bar-avg-maintenance"></div>
-            </div>
-            <span style="margin-left:8px;"><b id="avg-maintenance">-</b>/10</span>
-          </div>
-        </div>
-        <div>
-          <div class="rating-label">Communication</div>
-          <div style="display:flex;align-items:center;">
-            <div class="rating-bar-container">
-              <div class="rating-bar" id="bar-avg-communication"></div>
-            </div>
-            <span style="margin-left:8px;"><b id="avg-communication">-</b>/10</span>
-          </div>
-        </div>
-        <div>
-          <div class="rating-label">Équité</div>
-          <div style="display:flex;align-items:center;">
-            <div class="rating-bar-container">
-              <div class="rating-bar" id="bar-avg-fairness"></div>
-            </div>
-            <span style="margin-left:8px;"><b id="avg-fairness">-</b>/10</span>
-          </div>
-        </div>
-        <div>
-          <div class="rating-label">Note globale</div>
-          <div style="display:flex;align-items:center;">
-            <div class="rating-bar-container">
-              <div class="rating-bar" id="bar-avg-overall"></div>
-            </div>
-            <span style="margin-left:8px;"><b id="avg-overall">-</b>/10</span>
-          </div>
-        </div>
-        <div style="margin-top:8px;">Nombre d’avis : <span id="review-count">0</span></div>
+  <section id="landlord-info">
+    <h2 id="landlord-name">Chargement...</h2>
 
-        <button id="add-review-btn">Ajouter un avis</button>
-        <div id="login-warning">Veuillez vous connecter pour ajouter un avis.</div>
+    <ul class="contact-list">
+      <li>Email : <span id="landlord-email">Chargement...</span></li>
+      <li>Téléphone : <span id="landlord-phone">Chargement...</span></li>
+      <li>Adresse : <span id="landlord-address">Chargement...</span></li>
+    </ul>
+
+    <div id="landlord-stats" style="margin: 18px 0; background: #f5faff; border-radius: 8px; padding: 16px; max-width: 400px;">
+      <h3 style="margin-top: 0;">Moyennes des avis</h3>
+
+      <div class="rating-label">Réactivité</div>
+      <div class="rating-bar-container">
+        <div class="rating-bar" id="bar-avg-responsiveness"></div>
       </div>
-    </section>
+      <span><b id="avg-responsiveness">-</b>/10</span>
 
-    <section id="landlord-reviews">
-      <h3>Avis sur le propriétaire</h3>
-      <div id="reviews-list">Chargement...</div>
-    </section>
-  </main>
+      <div class="rating-label">Maintenance</div>
+      <div class="rating-bar-container">
+        <div class="rating-bar" id="bar-avg-maintenance"></div>
+      </div>
+      <span><b id="avg-maintenance">-</b>/10</span>
 
-  <footer>
-    <p>&copy; 2025 LocaLeaks | Par les étudiants, pour les étudiants</p>
-  </footer>
+      <div class="rating-label">Communication</div>
+      <div class="rating-bar-container">
+        <div class="rating-bar" id="bar-avg-communication"></div>
+      </div>
+      <span><b id="avg-communication">-</b>/10</span>
 
-  <script>
-    function getQueryParam(name) {
-      const params = new URLSearchParams(window.location.search);
-      return params.get(name);
-    }
+      <div class="rating-label">Équité</div>
+      <div class="rating-bar-container">
+        <div class="rating-bar" id="bar-avg-fairness"></div>
+      </div>
+      <span><b id="avg-fairness">-</b>/10</span>
 
-    function getBarColor(score) {
-      const r = score < 5 ? 255 : Math.round(255 - (score - 5) * 51);
-      const g = score > 5 ? 255 : Math.round(score * 51);
-      return `rgb(${r},${g},80)`;
-    }
+      <div class="rating-label">Note globale</div>
+      <div class="rating-bar-container">
+        <div class="rating-bar" id="bar-avg-overall"></div>
+      </div>
+      <span><b id="avg-overall">-</b>/10</span>
 
-    const landlordId = getQueryParam("id");
-    if (!landlordId) {
-      alert("Aucun ID de propriétaire fourni !");
-      throw new Error("Missing landlord ID in URL");
-    }
+      <div style="margin-top:8px;">
+        Nombre d’avis : <span id="review-count">0</span>
+      </div>
 
-    async function fetchLandlordData(id) {
-      try {
-        const token = localStorage.getItem("token");
-        const response = await fetch(`https://localeaks-webint-erz1.onrender.com/landlord/${id}`, {
-          headers: {
-            "Authorization": token ? `Bearer ${token}` : ""
-          }
-        });
-        if (!response.ok) throw new Error("Erreur réseau");
-        const data = await response.json();
-        return data;
-      } catch (err) {
-        console.error(err);
-        alert("Impossible de récupérer les données du propriétaire depuis le serveur.");
-        return null;
-      }
-    }
+      <button id="add-review-btn">Ajouter un avis</button>
+      <div id="login-warning">Veuillez vous connecter pour ajouter un avis.</div>
+    </div>
+  </section>
 
-    function renderLandlord(data) {
-      if (!data) return;
+  <!-- APARTMENTS -->
+  <section id="landlord-apartments">
+    <h3>Appartements</h3>
+    <div id="apartments-list">Chargement...</div>
+  </section>
 
-      document.getElementById("landlord-name").textContent = data.name || "-";
-      document.getElementById("landlord-email").textContent = data.email || "-";
-      document.getElementById("landlord-phone").textContent = data.phone || "-";
-      document.getElementById("landlord-address").textContent = data.address || "-";
+  <section id="landlord-reviews">
+    <h3>Avis sur le propriétaire</h3>
+    <div id="reviews-list">Chargement...</div>
+  </section>
 
-      const avg = data.average_reviews || {};
-      document.getElementById("avg-responsiveness").textContent = (avg.responsiveness || 0).toFixed(1);
-      document.getElementById("avg-maintenance").textContent = (avg.maintenance || 0).toFixed(1);
-      document.getElementById("avg-communication").textContent = (avg.communication || 0).toFixed(1);
-      document.getElementById("avg-fairness").textContent = (avg.fairness || 0).toFixed(1);
-      document.getElementById("avg-overall").textContent = (avg.overall || 0).toFixed(1);
-      document.getElementById("review-count").textContent = avg.review_count || 0;
+</main>
 
-      document.getElementById("bar-avg-responsiveness").style.width = (avg.responsiveness || 0) * 10 + "%";
-      document.getElementById("bar-avg-maintenance").style.width = (avg.maintenance || 0) * 10 + "%";
-      document.getElementById("bar-avg-communication").style.width = (avg.communication || 0) * 10 + "%";
-      document.getElementById("bar-avg-fairness").style.width = (avg.fairness || 0) * 10 + "%";
-      document.getElementById("bar-avg-overall").style.width = (avg.overall || 0) * 10 + "%";
+<footer>
+  <p>&copy; 2025 LocaLeaks | Par les étudiants, pour les étudiants</p>
+</footer>
 
-      const reviewsList = document.getElementById("reviews-list");
-      reviewsList.innerHTML = "";
-      if (!data.reviews || data.reviews.length === 0) {
-        reviewsList.textContent = "Aucun avis pour ce propriétaire.";
-      } else {
-        data.reviews.forEach(r => {
-          const div = document.createElement("div");
-          div.className = "review-card";
-          div.innerHTML = `
-            <div style="display:flex;align-items:center;gap:12px;">
-              <img src="${r.profile_pic || 'LocaLeaksFavicon.png'}" alt="Profil" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:1px solid #ccc;">
-              <div style="flex:1;">
-                <strong>${r.author || 'Étudiant ' + r.student_id}</strong>
-                <span style="color:#888;font-size:0.9em;float:right;margin-left:8px;">${new Date(r.created_at).toLocaleDateString()}</span>
-              </div>
-            </div>
-            <div style="margin:10px 0 0 0;">
-              <div class="rating-label">Réactivité</div>
-              <div class="rating-bar-container">
-                <div class="rating-bar" style="width:${r.responsiveness*10}%;background:${getBarColor(r.responsiveness)}"></div>
-              </div>
-              <span><b>${r.responsiveness}</b>/10</span>
-            </div>
-            <div>
-              <div class="rating-label">Maintenance</div>
-              <div class="rating-bar-container">
-                <div class="rating-bar" style="width:${r.maintenance*10}%;background:${getBarColor(r.maintenance)}"></div>
-              </div>
-              <span><b>${r.maintenance}</b>/10</span>
-            </div>
-            <div>
-              <div class="rating-label">Communication</div>
-              <div class="rating-bar-container">
-                <div class="rating-bar" style="width:${r.communication*10}%;background:${getBarColor(r.communication)}"></div>
-              </div>
-              <span><b>${r.communication}</b>/10</span>
-            </div>
-            <div>
-              <div class="rating-label">Équité</div>
-              <div class="rating-bar-container">
-                <div class="rating-bar" style="width:${r.fairness*10}%;background:${getBarColor(r.fairness)}"></div>
-              </div>
-              <span><b>${r.fairness}</b>/10</span>
-            </div>
-            <div>
-              <div class="rating-label">Note globale</div>
-              <div class="rating-bar-container">
-                <div class="rating-bar" style="width:${r.overall*10}%;background:${getBarColor(r.overall)}"></div>
-              </div>
-              <span><b>${r.overall}</b>/10</span>
-            </div>
-            <div style="margin-top:8px;">${r.comment || ""}</div>
-          `;
-          reviewsList.appendChild(div);
-        });
-      }
-    }
+<script>
+function getQueryParam(name) {
+  return new URLSearchParams(window.location.search).get(name);
+}
 
-    // --- Button logic ---
-    document.addEventListener("DOMContentLoaded", () => {
-      const addBtn = document.getElementById("add-review-btn");
-      const warning = document.getElementById("login-warning");
-      addBtn.addEventListener("click", () => {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          warning.style.display = "block";
-        } else {
-          window.location.href = `leave_review_landlord.html?id=${landlordId}`;
-        }
-      });
+function getBarColor(score) {
+  const r = score < 5 ? 255 : Math.round(255 - (score - 5) * 51);
+  const g = score > 5 ? 255 : Math.round(score * 51);
+  return `rgb(${r},${g},80)`;
+}
+
+const landlordId = getQueryParam("id");
+if (!landlordId) throw new Error("Missing landlord ID");
+
+async function fetchLandlordData(id) {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`https://localeaks-webint-erz1.onrender.com/landlord/${id}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {}
+  });
+
+  const text = await response.text();
+  if (!response.ok) throw new Error(text);
+
+  return JSON.parse(text);
+}
+
+function renderLandlord(data) {
+  if (!data) return;
+
+  document.getElementById("landlord-name").textContent = data.name || "-";
+  document.getElementById("landlord-email").textContent = data.email || "-";
+  document.getElementById("landlord-phone").textContent = data.phone || "-";
+  document.getElementById("landlord-address").textContent = data.address || "-";
+
+  const avg = data.average_reviews || {};
+
+  document.getElementById("avg-responsiveness").textContent = (avg.responsiveness || 0).toFixed(1);
+  document.getElementById("avg-maintenance").textContent = (avg.maintenance || 0).toFixed(1);
+  document.getElementById("avg-communication").textContent = (avg.communication || 0).toFixed(1);
+  document.getElementById("avg-fairness").textContent = (avg.fairness || 0).toFixed(1);
+  document.getElementById("avg-overall").textContent = (avg.overall || 0).toFixed(1);
+  document.getElementById("review-count").textContent = avg.review_count || 0;
+
+  const reviewsList = document.getElementById("reviews-list");
+  reviewsList.innerHTML = "";
+
+  if (!data.reviews || data.reviews.length === 0) {
+    reviewsList.textContent = "Aucun avis pour ce propriétaire.";
+  } else {
+    data.reviews.forEach(r => {
+      const div = document.createElement("div");
+      div.className = "review-card";
+      div.innerHTML = `
+        <strong>${r.author}</strong><br>
+        ${r.comment || ""}
+      `;
+      reviewsList.appendChild(div);
     });
+  }
 
-    // --- Init ---
-    (async () => {
-      const data = await fetchLandlordData(landlordId);
-      renderLandlord(data);
-    })();
-  </script>
+  // APARTMENTS RENDER
+  const list = document.getElementById("apartments-list");
+  list.innerHTML = "";
 
-  <script src="header.js"></script>
+  if (!data.apartments || data.apartments.length === 0) {
+    list.textContent = "Aucun appartement.";
+  } else {
+    data.apartments.forEach(a => {
+      const div = document.createElement("div");
+      div.className = "apartment-card";
+
+      div.innerHTML = `
+        <strong>${a.address || "Adresse inconnue"}</strong><br>
+        Étage: ${a.floor ?? "-"}<br>
+        Chambres: ${a.bedrooms ?? "-"}
+      `;
+
+      div.onclick = () => {
+        window.location.href = `apartment.html?id=${a.id}`;
+      };
+
+      list.appendChild(div);
+    });
+  }
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const data = await fetchLandlordData(landlordId);
+  renderLandlord(data);
+});
+</script>
+
+<script src="header.js"></script>
 </body>
 </html>

@@ -176,7 +176,7 @@ def get_landlord_details(landlord_id):
 
         # --- Apartments for this landlord ---
         result = conn.execute(text("""
-            SELECT id, number, floor, bedrooms, features
+            SELECT id, number, floor, bedrooms, features, address
             FROM apartment
             WHERE landlord_id = :landlord_id
             ORDER BY number

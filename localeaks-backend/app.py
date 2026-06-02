@@ -259,6 +259,14 @@ def add_review(review: dict, user_id: int = Depends(get_current_user)):
 
     return {"status": "success"}
 
+@app.get("/landlord/{landlord_id}")
+def landlord_details(landlord_id: int, user_id: int = Depends(get_current_user)):
+    data = get_landlord_details(landlord_id)
+
+    if not data:
+        raise HTTPException(status_code=404, detail="Landlord not found")
+
+    return data
 
 @app.post("/landlord-reviews")
 def add_landlord_review(review: dict, user_id: int = Depends(get_current_user)):
