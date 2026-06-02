@@ -3,19 +3,6 @@
 // ========================
 const input = document.getElementById("searchInput");
 
-const localAddresses = [
-  {
-    label: "15 avenue Docteur Dautheville, 06160 Antibes",
-    lat: "43.56919",
-    lon: "7.11292"
-  },
-  {
-    label: "24 boulevard Gustave Chancel, 06160 Antibes",
-    lat: "43.579281",
-    lon: "7.118433"
-  }
-];
-
 const suggestionsBox = document.getElementById("suggestions");
 const searchBtn = document.getElementById("searchBtn");
 
@@ -49,22 +36,6 @@ function formatPlace(place) {
 // Show suggestions in dropdown
 function showSuggestions(suggestions) {
   suggestionsBox.innerHTML = "";
-
-  // Adresses locales en premier
-  const q = input.value.trim().toLowerCase();
-  const localMatches = localAddresses.filter(a =>
-    a.label.toLowerCase().includes(q)
-  );
-  localMatches.forEach(a => {
-    const div = document.createElement("div");
-    div.textContent = "📍 " + a.label;
-    div.addEventListener("click", () => {
-      input.value = a.label;
-      suggestionsBox.innerHTML = "";
-      window.location.href = `address.html?lat=${a.lat}&lon=${a.lon}&label=${encodeURIComponent(a.label)}`;
-    });
-    suggestionsBox.appendChild(div);
-  });
 
   // Puis les résultats OpenStreetMap
   suggestions.forEach((place) => {
