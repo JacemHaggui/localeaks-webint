@@ -131,6 +131,15 @@ def get_apartment_details(apartment_id):
         charges_row = result.fetchone()
         apartment_data["charges"] = dict(charges_row._mapping) if charges_row else None
 
+        # --- Apartment photos ---
+        result = conn.execute(text("""
+            SELECT url
+            FROM apartment_photo
+            WHERE apartment_id = :apartment_id
+        """), {"apartment_id": apartment_id})
+
+        apartment_data["photos"] = [row._mapping["url"] for row in result]
+
         return apartment_data
 # =========================
 # Landlord functions

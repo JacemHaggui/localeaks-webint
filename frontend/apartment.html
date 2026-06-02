@@ -7,17 +7,6 @@
   <link rel="icon" href="LocaLeaksFavicon.png" type="image/png">
   <link rel="stylesheet" href="style.css">
   <style>
-    .apartment-videos {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      margin-bottom: 18px;
-    }
-    .apt-video {
-      width: 480px;
-      max-width: 100%;
-      border-radius: 8px;
-    }
     .apartment-photos {
       display: flex;
       gap: 12px;
@@ -60,13 +49,10 @@
       margin-bottom: 18px;
       padding: 16px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-      
-      /* Make it fill the container */
       width: 98%;
-      max-width: none; /* override previous limit */
-      box-sizing: border-box; /* ensure padding is included */
+      max-width: none;
+      box-sizing: border-box;
     }
-
   </style>
 </head>
 <body>
@@ -79,6 +65,7 @@
   <main>
     <section id="apartment-info">
       <h2 id="apartment-address">Chargement...</h2>
+
       <div class="apartment-details">
         <div><b>Surface :</b> <span id="apartment-surface">-</span> m²</div>
         <div><b>Type :</b> <span id="apartment-type">-</span></div>
@@ -87,9 +74,12 @@
         <div><b>Charges :</b> <span id="apartment-charges">-</span></div>
         <div><b>Propriétaire :</b> <a id="landlord-link" class="landlord-link" href="#">Chargement...</a></div>
       </div>
+
       <div class="apartment-photos" id="apartment-photos"></div>
+
       <div id="apartment-stats" style="margin: 18px 0; background: #f5faff; border-radius: 8px; padding: 16px; max-width: 400px;">
         <h3 style="margin-top: 0;">Moyennes des avis</h3>
+
         <div>
           <div class="rating-label">Propreté</div>
           <div style="display:flex;align-items:center;">
@@ -97,6 +87,7 @@
             <span style="margin-left:8px;"><b id="avg-cleanliness">-</b>/10</span>
           </div>
         </div>
+
         <div>
           <div class="rating-label">État général</div>
           <div style="display:flex;align-items:center;">
@@ -104,6 +95,7 @@
             <span style="margin-left:8px;"><b id="avg-condition">-</b>/10</span>
           </div>
         </div>
+
         <div>
           <div class="rating-label">Confort</div>
           <div style="display:flex;align-items:center;">
@@ -111,6 +103,7 @@
             <span style="margin-left:8px;"><b id="avg-comfort">-</b>/10</span>
           </div>
         </div>
+
         <div>
           <div class="rating-label">Note globale</div>
           <div style="display:flex;align-items:center;">
@@ -118,6 +111,7 @@
             <span style="margin-left:8px;"><b id="avg-overall">-</b>/10</span>
           </div>
         </div>
+
         <div style="margin-top:8px;">Nombre d’avis : <span id="review-count">0</span></div>
       </div>
 
@@ -127,13 +121,21 @@
         </button>
       </div>
 
+      <!-- NEW: upload photo -->
+      <div style="text-align:center; margin-top:10px;">
+        <input type="file" id="photoInput" accept="image/*" style="margin-bottom:8px;">
+        <br>
+        <button id="uploadPhotoBtn" style="padding:10px 16px; background:#4caf50; color:#fff; border:none; border-radius:4px; cursor:pointer;">
+          Ajouter une photo
+        </button>
+      </div>
+
     </section>
 
     <section id="apartment-reviews">
       <h3>Avis sur l'appartement</h3>
       <div id="reviews-list">Chargement...</div>
     </section>
-
   </main>
 
   <footer>
@@ -162,7 +164,7 @@
       const token = localStorage.getItem("token");
 
       try {
-        const response = await fetch(`https://localeaks-webint-erz1.onrender.com/apartment/${id}`, {
+        const response = await fetch(`http://127.0.0.1:8000/apartment/${id}`, {
           headers: {
             "Authorization": token ? `Bearer ${token}` : ""
           }
@@ -224,22 +226,6 @@
         photosContainer.textContent = "Aucune photo disponible.";
       }
 
-      // Videos
-      const videosContainer = document.createElement("div");
-      videosContainer.className = "apartment-videos";
-      if (data.videos && data.videos.length > 0) {
-        data.videos.forEach(url => {
-          const video = document.createElement("video");
-          video.controls = true;
-          video.className = "apt-video";
-          video.innerHTML = `<source src="${url}" type="video/mp4">`;
-          videosContainer.appendChild(video);
-        });
-      } else {
-        videosContainer.textContent = "Aucune vidéo disponible.";
-      }
-      photosContainer.insertAdjacentElement("afterend", videosContainer);
-
       const avg = data.average_reviews || {};
       document.getElementById("avg-cleanliness").textContent = (avg.cleanliness || 0).toFixed(1);
       document.getElementById("avg-condition").textContent = (avg.value || 0).toFixed(1);
@@ -247,13 +233,14 @@
       document.getElementById("avg-overall").textContent = (avg.overall || 0).toFixed(1);
       document.getElementById("review-count").textContent = avg.review_count || 0;
 
-      document.getElementById("bar-avg-cleanliness").style.width = ((avg.cleanliness || 0)*10) + "%";
-      document.getElementById("bar-avg-condition").style.width = ((avg.value || 0)*10) + "%";
-      document.getElementById("bar-avg-comfort").style.width = ((avg.amenities || 0)*10) + "%";
-      document.getElementById("bar-avg-overall").style.width = ((avg.overall || 0)*10) + "%";
+      document.getElementById("bar-avg-cleanliness").style.width = ((avg.cleanliness || 0) * 10) + "%";
+      document.getElementById("bar-avg-condition").style.width = ((avg.value || 0) * 10) + "%";
+      document.getElementById("bar-avg-comfort").style.width = ((avg.amenities || 0) * 10) + "%";
+      document.getElementById("bar-avg-overall").style.width = ((avg.overall || 0) * 10) + "%";
 
       const reviewsList = document.getElementById("reviews-list");
       reviewsList.innerHTML = "";
+
       if (!data.reviews || data.reviews.length === 0) {
         reviewsList.textContent = "Aucun avis pour cet appartement.";
       } else {
@@ -262,34 +249,47 @@
           div.className = "review-card";
           div.innerHTML = `
             <div style="display:flex;align-items:center;gap:12px;">
-              <img src="LocaLeaksFavicon.png" alt="Profil" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:1px solid #ccc;">
+              <img src="LocaLeaksFavicon.png" style="width:40px;height:40px;border-radius:50%;">
               <div style="flex:1;">
                 <strong>${r.student_name}</strong>
-                <span style="color:#888; font-size:0.9em; float:right; margin-left: 10px;">
-                ${new Date(r.created_at).toLocaleDateString()}
+                <span style="float:right;color:#888;font-size:0.9em;">
+                  ${new Date(r.created_at).toLocaleDateString()}
                 </span>
               </div>
             </div>
-            <div style="margin:10px 0 0 0;">
+
+            <div style="margin-top:10px;">
               <div class="rating-label">Propreté</div>
-              <div class="rating-bar-container"><div class="rating-bar" style="width:${r.cleanliness*10}%;background:${getBarColor(r.cleanliness)}"></div></div>
+              <div class="rating-bar-container">
+                <div class="rating-bar" style="width:${r.cleanliness * 10}%;background:${getBarColor(r.cleanliness)}"></div>
+              </div>
               <span><b>${r.cleanliness}</b>/10</span>
             </div>
+
             <div>
               <div class="rating-label">État général</div>
-              <div class="rating-bar-container"><div class="rating-bar" style="width:${r.value_for_money*10}%;background:${getBarColor(r.value_for_money)}"></div></div>
+              <div class="rating-bar-container">
+                <div class="rating-bar" style="width:${r.value_for_money * 10}%;background:${getBarColor(r.value_for_money)}"></div>
+              </div>
               <span><b>${r.value_for_money}</b>/10</span>
             </div>
+
             <div>
               <div class="rating-label">Confort</div>
-              <div class="rating-bar-container"><div class="rating-bar" style="width:${r.amenities*10}%;background:${getBarColor(r.amenities)}"></div></div>
+              <div class="rating-bar-container">
+                <div class="rating-bar" style="width:${r.amenities * 10}%;background:${getBarColor(r.amenities)}"></div>
+              </div>
               <span><b>${r.amenities}</b>/10</span>
             </div>
+
             <div>
               <div class="rating-label">Note globale</div>
-              <div class="rating-bar-container"><div class="rating-bar" style="width:${r.overall*10}%;background:${getBarColor(r.overall)}"></div></div>
+              <div class="rating-bar-container">
+                <div class="rating-bar" style="width:${r.overall * 10}%;background:${getBarColor(r.overall)}"></div>
+              </div>
               <span><b>${r.overall}</b>/10</span>
             </div>
+
             <div style="margin-top:8px;">${r.comment || ""}</div>
           `;
           reviewsList.appendChild(div);
@@ -302,21 +302,52 @@
       renderApartment(data);
     })();
 
-    const leaveReviewBtn = document.getElementById("leaveReviewBtn");
-    leaveReviewBtn.addEventListener("click", () => {
+    document.getElementById("leaveReviewBtn").addEventListener("click", () => {
       const token = localStorage.getItem("token");
       if (!token) {
-        alert("⚠ Vous devez être connecté pour laisser un avis.");
+        alert("Vous devez être connecté.");
         return;
       }
-      // Redirect to review page with apartment ID
       window.location.href = `leave_review.html?id=${apartmentId}`;
     });
 
+    document.getElementById("uploadPhotoBtn").addEventListener("click", async () => {
+      const fileInput = document.getElementById("photoInput");
+      const file = fileInput.files[0];
+
+      if (!file) {
+        alert("Sélectionne une image.");
+        return;
+      }
+
+      const token = localStorage.getItem("token");
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const res = await fetch(
+          `http://127.0.0.1:8000/apartment/${apartmentId}/photos`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: token ? `Bearer ${token}` : ""
+            },
+            body: formData
+          }
+        );
+
+        if (!res.ok) throw new Error("Upload failed");
+
+        alert("Photo ajoutée");
+        location.reload();
+      } catch (err) {
+        console.error(err);
+        alert("Erreur upload");
+      }
+    });
   </script>
+
   <script src="header.js"></script>
-
-
-
 </body>
 </html>
