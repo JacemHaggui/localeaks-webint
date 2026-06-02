@@ -430,9 +430,12 @@ def delete_account(
             conn.execute(text("""
                 UPDATE student
                 SET name = 'Ex-LocaLeaker',
-                    email = 'deleted_' || id || '@local.invalid',
-                    password_hash = '$disabled$',
+                    email = :email,
+                    password_hash = '$disabled$'
                 WHERE id = :id
-            """), {"id": user_id})
+            """), {
+                "id": user_id,
+                "email": f"deleted_{user_id}@local.invalid"
+            })
 
     return {"status": "success"}
