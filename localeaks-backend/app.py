@@ -396,11 +396,11 @@ def delete_account(
     with engine.begin() as conn:
 
         user = conn.execute(
-            text("SELECT password_hash, is_deleted FROM student WHERE id = :id"),
+            text("SELECT password_hash FROM student WHERE id = :id"),
             {"id": user_id}
         ).fetchone()
 
-        if not user or user.is_deleted:
+        if not user:
             raise HTTPException(status_code=404)
 
         if not pwd_context.verify(password, user.password_hash):
