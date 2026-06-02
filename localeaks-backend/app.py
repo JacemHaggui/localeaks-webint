@@ -387,32 +387,56 @@ def search_landlords(search: str, user_id: int = Depends(get_current_user)):
     return search_landlord_by_name(search)
 
 
-# ----------------------------
-# Account deletion
-# ----------------------------
 @app.delete("/me")
 def delete_account(
     password: str = Body(..., embed=True),
     deleteReviews: bool = Body(False, embed=True),
     user_id: int = Depends(get_current_user)
 ):
-
     with engine.begin() as conn:
 
         user = conn.execute(
-            text("SELECT password_hash FROM student WHERE id = :id"),
+            text("SELECT password_hash, is_deleted FROM student WHERE id = :id"),
             {"id": user_id}
         ).fetchone()
 
-        if not user or not pwd_context.verify(password, user.password_hash):
+        if not user or user.is_deleted:
+            raise HTTPException(status_code=404)
+
+        if not pwd_context.verify(password, user.password_hash):
             raise HTTPException(status_code=401)
 
+        # ----------------------------
+        # Case 1: full wipe
+        # ----------------------------
         if deleteReviews:
-            conn.execute(text("DELETE FROM apartment_review WHERE student_id = :id"), {"id": user_id})
-            conn.execute(text("DELETE FROM landlord_review WHERE student_id = :id"), {"id": user_id})
+            conn.execute(
+                text("DELETE FROM apartment_review WHERE student_id = :id"),
+                {"id": user_id}
+            )
+            conn.execute(
+                text("DELETE FROM landlord_review WHERE student_id = :id"),
+                {"id": user_id}
+            )
+
+            conn.execute(
+                text("DELETE FROM student WHERE id = :id"),
+                {"id": user_id}
+            )
+
+        # ----------------------------
+        # Case 2: keep reviews, anonymize user
+        # ----------------------------
         else:
             conn.execute(
-                text("UPDATE student SET name='Ex-LocaLeaker' WHERE id=:id"),
+                text("""
+                    UPDATE student
+                    SET name = 'Ex-LocaLeaker',
+                        email = NULL,
+                        password_hash = NULL,
+                        is_deleted = TRUE
+                    WHERE id = :id
+                """),
                 {"id": user_id}
             )
 
