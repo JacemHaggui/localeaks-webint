@@ -18,6 +18,7 @@ from queries import (
 
 import random
 import os
+import json
 from dotenv import load_dotenv
 
 import cloudinary
@@ -27,6 +28,9 @@ from email_utils import send_verification_email
 
 load_dotenv()
 
+# ----------------------------
+# Cloudinary configuration
+# ----------------------------
 cloudinary.config(
     cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
     api_key=os.getenv("CLOUDINARY_API_KEY"),
@@ -34,24 +38,67 @@ cloudinary.config(
     secure=True
 )
 
+# ----------------------------
+# JWT configuration
+# ----------------------------
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
+# ----------------------------
+# Password hashing setup
+# ----------------------------
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
+
+# OAuth2 token handling
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
+# ----------------------------
+# Load allowed French university domains
+# ----------------------------
+with open("france_domains.json", "r", encoding="utf-8") as f:
+    ALLOWED_DOMAINS = set(json.load(f))
+
+
+def is_university_email(email: str) -> bool:
+    """
+    Returns True if the email belongs to a known French academic domain.
+    This is based on a precomputed list of university domains.
+    """
+    if "@" not in email:
+        return False
+
+    domain = email.split("@", 1)[1].lower().strip()
+
+    # Direct match
+    if domain in ALLOWED_DOMAINS:
+        return True
+
+    # Optional: support subdomains (e.g. mail.univ-paris1.fr)
+    for allowed in ALLOWED_DOMAINS:
+        if domain == allowed or domain.endswith("." + allowed):
+            return True
+
+    return False
+
+
+# ----------------------------
+# FastAPI app setup
+# ----------------------------
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # tighten in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
+# ----------------------------
+# Security helpers
+# ----------------------------
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
@@ -61,6 +108,9 @@ def get_password_hash(password):
 
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
+    """
+    Creates a JWT access token for authentication.
+    """
     to_encode = data.copy()
     expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     to_encode.update({"exp": expire})
@@ -68,16 +118,25 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 
 
 def get_current_user(token: str = Depends(oauth2_scheme)):
+    """
+    Extracts user ID from JWT token.
+    """
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id: int = payload.get("sub")
+
         if user_id is None:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+            raise HTTPException(status_code=401, detail="Invalid token")
+
         return user_id
+
     except JWTError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+        raise HTTPException(status_code=401, detail="Invalid token")
 
 
+# ----------------------------
+# Registration endpoint
+# ----------------------------
 @app.post("/register")
 def signup(user: dict):
     name = user.get("name")
@@ -87,9 +146,15 @@ def signup(user: dict):
     if not all([name, email, password]):
         raise HTTPException(status_code=400, detail="Missing required fields")
 
+    # Enforce university email restriction
+    if not is_university_email(email):
+        raise HTTPException(status_code=400, detail="University email required")
+
     hashed_password = get_password_hash(password)
 
     with engine.begin() as conn:
+
+        # Check if email already exists
         existing = conn.execute(
             text("SELECT id FROM student WHERE email = :email"),
             {"email": email}
@@ -98,6 +163,7 @@ def signup(user: dict):
         if existing:
             raise HTTPException(status_code=400, detail="Email already registered")
 
+        # Create student account
         result = conn.execute(
             text("""
                 INSERT INTO student (name, email, password_hash, created_at, is_verified)
@@ -109,6 +175,7 @@ def signup(user: dict):
 
         student_id = result.fetchone()[0]
 
+        # Generate email verification code
         code = random.randint(100000, 999999)
         expires_at = datetime.now() + timedelta(minutes=15)
 
@@ -125,6 +192,9 @@ def signup(user: dict):
     return {"status": "success"}
 
 
+# ----------------------------
+# Email verification endpoint
+# ----------------------------
 @app.post("/verify")
 def verify_email(data: dict):
     email = data.get("email")
@@ -134,6 +204,7 @@ def verify_email(data: dict):
         raise HTTPException(status_code=400)
 
     with engine.begin() as conn:
+
         row = conn.execute(
             text("""
                 SELECT s.id, v.code, v.expires_at
@@ -166,9 +237,13 @@ def verify_email(data: dict):
     return {"status": "success"}
 
 
+# ----------------------------
+# Login endpoint
+# ----------------------------
 @app.post("/login")
 def login(form_data: OAuth2PasswordRequestForm = Depends()):
     with engine.connect() as conn:
+
         user = conn.execute(
             text("SELECT id, password_hash, is_verified FROM student WHERE email = :email"),
             {"email": form_data.username}
@@ -184,9 +259,13 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
         return {"access_token": token, "token_type": "bearer"}
 
 
+# ----------------------------
+# Current user endpoint
+# ----------------------------
 @app.get("/me")
 def read_current_user(user_id: int = Depends(get_current_user)):
     with engine.connect() as conn:
+
         user = conn.execute(
             text("SELECT id, name, email FROM student WHERE id = :id"),
             {"id": user_id}
@@ -198,6 +277,9 @@ def read_current_user(user_id: int = Depends(get_current_user)):
         return {"id": user.id, "name": user.name, "email": user.email}
 
 
+# ----------------------------
+# Apartment endpoints
+# ----------------------------
 @app.get("/apartments")
 def get_apartments(address: str = Query(...), user_id: int = Depends(get_current_user)):
     return {"apartments": fetch_apartments_by_address(address)}
@@ -217,6 +299,9 @@ def create_apartment(apartment: dict, user_id: int = Depends(get_current_user)):
     return {"status": "success"}
 
 
+# ----------------------------
+# File upload (Cloudinary)
+# ----------------------------
 @app.post("/apartment/{apartment_id}/photos")
 async def upload_apartment_photo(
     apartment_id: int,
@@ -242,9 +327,11 @@ async def upload_apartment_photo(
     return {"url": url}
 
 
+# ----------------------------
+# Reviews
+# ----------------------------
 @app.post("/reviews")
 def add_review(review: dict, user_id: int = Depends(get_current_user)):
-    apartment_id = review.get("apartment_id")
 
     with engine.begin() as conn:
         conn.execute(
@@ -259,17 +346,10 @@ def add_review(review: dict, user_id: int = Depends(get_current_user)):
 
     return {"status": "success"}
 
-@app.get("/landlord/{landlord_id}")
-def landlord_details(landlord_id: int, user_id: int = Depends(get_current_user)):
-    data = get_landlord_details(landlord_id)
-
-    if not data:
-        raise HTTPException(status_code=404, detail="Landlord not found")
-
-    return data
 
 @app.post("/landlord-reviews")
 def add_landlord_review(review: dict, user_id: int = Depends(get_current_user)):
+
     with engine.begin() as conn:
         conn.execute(
             text("""
@@ -284,6 +364,19 @@ def add_landlord_review(review: dict, user_id: int = Depends(get_current_user)):
     return {"status": "success"}
 
 
+# ----------------------------
+# Landlord endpoints
+# ----------------------------
+@app.get("/landlord/{landlord_id}")
+def landlord_details(landlord_id: int, user_id: int = Depends(get_current_user)):
+    data = get_landlord_details(landlord_id)
+
+    if not data:
+        raise HTTPException(status_code=404, detail="Landlord not found")
+
+    return data
+
+
 @app.post("/landlords")
 def create_landlord(landlord: dict, user_id: int = Depends(get_current_user)):
     return add_landlord(landlord)
@@ -294,13 +387,18 @@ def search_landlords(search: str, user_id: int = Depends(get_current_user)):
     return search_landlord_by_name(search)
 
 
+# ----------------------------
+# Account deletion
+# ----------------------------
 @app.delete("/me")
 def delete_account(
     password: str = Body(..., embed=True),
     deleteReviews: bool = Body(False, embed=True),
     user_id: int = Depends(get_current_user)
 ):
+
     with engine.begin() as conn:
+
         user = conn.execute(
             text("SELECT password_hash FROM student WHERE id = :id"),
             {"id": user_id}
