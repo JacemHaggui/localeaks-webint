@@ -12,3 +12,5 @@ argon2-cffi==25.1.0
 python-multipart==0.0.20
 
 requests==2.32.5
+
+cloudinary
