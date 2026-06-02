@@ -418,7 +418,6 @@ def delete_account(
                 text("DELETE FROM landlord_review WHERE student_id = :id"),
                 {"id": user_id}
             )
-
             conn.execute(
                 text("DELETE FROM student WHERE id = :id"),
                 {"id": user_id}
@@ -428,16 +427,12 @@ def delete_account(
         # Case 2: keep reviews, anonymize user
         # ----------------------------
         else:
-            conn.execute(
-                text("""
-                    UPDATE student
-                    SET name = 'Ex-LocaLeaker',
-                        email = NULL,
-                        password_hash = NULL,
-                        is_deleted = TRUE
-                    WHERE id = :id
-                """),
-                {"id": user_id}
-            )
+            conn.execute(text("""
+                UPDATE student
+                SET name = 'Ex-LocaLeaker',
+                    email = 'deleted_' || id || '@local.invalid',
+                    password_hash = '$disabled$',
+                WHERE id = :id
+            """), {"id": user_id})
 
     return {"status": "success"}
